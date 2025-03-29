@@ -15,6 +15,7 @@ import {
   Upload as UploadIcon,
   Computer as ComputerIcon,
 } from '@mui/icons-material';
+import PageContainer from '../components/layout/PageContainer';
 
 const Record = () => {
   const [mode, setMode] = useState(0); // 0: microfono, 1: sistema, 2: upload
@@ -66,12 +67,28 @@ const Record = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <PageContainer>
       <Typography variant="h4" gutterBottom>
         Registra Audio
       </Typography>
       
-      <Paper sx={{ mt: 3 }}>
+      <Paper sx={{ 
+        mt: 3,
+        borderRadius: '16px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+        border: '1px solid rgba(240,44,86,0.1)',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: '4px',
+          background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)'
+        }
+      }}>
         <Tabs
           value={mode}
           onChange={handleModeChange}
@@ -184,7 +201,7 @@ const Record = () => {
           )}
         </Box>
       </Paper>
-    </Box>
+    </PageContainer>
   );
 };
 

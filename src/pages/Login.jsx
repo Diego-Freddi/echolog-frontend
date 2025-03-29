@@ -4,6 +4,7 @@ import { Box, Typography, Paper } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/layout/Navbar';
 import GoogleLogin from '../components/auth/GoogleLogin';
+import PageContainer from '../components/layout/PageContainer';
 
 const Login = () => {
   const { user } = useAuth();
@@ -22,16 +23,9 @@ const Login = () => {
     }}>
       <Navbar />
       
-      <Box sx={{ 
-        flex: 1,
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center',
-        p: 3
-      }}>
+      <PageContainer maxWidth="sm" sx={{ display: 'flex', alignItems: 'center' }}>
         <Paper sx={{ 
           p: { xs: 3, sm: 4 }, 
-          maxWidth: 400, 
           width: '100%',
           borderRadius: '16px',
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
@@ -87,7 +81,7 @@ const Login = () => {
             <GoogleLogin />
           </Box>
         </Paper>
-      </Box>
+      </PageContainer>
     </Box>
   );
 };

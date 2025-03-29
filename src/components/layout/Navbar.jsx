@@ -1,91 +1,139 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   AppBar, 
   Toolbar, 
   Typography, 
-  Button, 
-  Box, 
+  IconButton,
+  Box,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Divider,
   Container,
-  IconButton
+  Stack
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import MicIcon from '@mui/icons-material/Mic';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import GoogleIcon from '@mui/icons-material/Google';
+import { Logout as LogoutIcon, Person as PersonIcon } from '@mui/icons-material';
 
 const Navbar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    handleClose();
+    navigate('/login');
+  };
 
   return (
     <AppBar 
       position="static" 
       sx={{ 
         background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)',
-        boxShadow: '0 3px 10px rgba(0,0,0,0.1)'
+        boxShadow: 'none'
       }}
     >
       <Container maxWidth="lg">
-        <Toolbar sx={{ padding: '12px 0' }}>
-          <Typography 
-            variant="h6" 
-            component="div" 
-            sx={{ 
-              flexGrow: 1, 
-              fontWeight: 600, 
-              fontSize: '1.25rem',
-              letterSpacing: '-0.01em'
-            }}
-          >
+        <Toolbar sx={{ px: { xs: 0, sm: 0 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
             <Link to="/" style={{ 
               color: 'white', 
               textDecoration: 'none', 
               display: 'flex', 
               alignItems: 'center' 
             }}>
-              <span style={{ 
-                background: 'rgba(255,255,255,0.2)', 
-                padding: '8px 12px', 
-                borderRadius: '12px', 
-                marginRight: '12px',
-                display: 'flex',
-                alignItems: 'center'
-              }}>
-                <MicIcon />
-              </span>
-              Registratore Audio
+              <img 
+                src="/EchoLog-Logo-512x143.png" 
+                alt="EchoLog Logo" 
+                style={{ 
+                  height: '32px',
+                  width: 'auto',
+                  marginRight: '16px'
+                }} 
+              />
             </Link>
-          </Typography>
+          </Box>
 
-          {user ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <IconButton 
+          {user && (
+            <Stack direction="row" spacing={2} alignItems="center">
+              <Typography 
+                variant="body1" 
                 sx={{ 
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
-                  padding: '8px'
+                  color: 'white',
+                  opacity: 0.9,
+                  fontWeight: 500,
+                  display: { xs: 'none', sm: 'block' }
                 }}
               >
-                <AccountCircleIcon sx={{ color: 'white' }} />
+                Ciao, {user.name}
+              </Typography>
+
+              <IconButton
+                size="large"
+                onClick={handleMenu}
+                sx={{ 
+                  padding: 0.5,
+                  border: '2px solid rgba(255,255,255,0.2)',
+                  '&:hover': {
+                    border: '2px solid rgba(255,255,255,0.3)'
+                  }
+                }}
+              >
+                <img 
+                  src={user.picture} 
+                  alt={user.name} 
+                  style={{ 
+                    width: 32, 
+                    height: 32, 
+                    borderRadius: '50%',
+                    objectFit: 'cover'
+                  }} 
+                />
               </IconButton>
-            </Box>
-          ) : (
-            <Button 
-              color="inherit" 
-              component={Link} 
-              to="/login"
-              startIcon={<GoogleIcon />}
-              sx={{ 
-                backgroundColor: 'rgba(255,255,255,0.1)', 
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.2)' },
-                borderRadius: '12px',
-                padding: '8px 20px',
-                textTransform: 'none',
-                fontWeight: 500
-              }}
-            >
-              Accedi con Google
-            </Button>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleClose}
+                onClick={handleClose}
+                PaperProps={{
+                  sx: {
+                    mt: 1.5,
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+                    border: '1px solid rgba(240,44,86,0.1)',
+                    borderRadius: '12px',
+                    minWidth: 200
+                  }
+                }}
+                transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+                anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              >
+                <MenuItem onClick={() => navigate('/profile')}>
+                  <ListItemIcon>
+                    <PersonIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Profilo</ListItemText>
+                </MenuItem>
+                <Divider />
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  <ListItemText>Logout</ListItemText>
+                </MenuItem>
+              </Menu>
+            </Stack>
           )}
         </Toolbar>
       </Container>
