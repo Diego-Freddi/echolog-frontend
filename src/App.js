@@ -1,11 +1,65 @@
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import CssBaseline from '@mui/material/CssBaseline';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import MainLayout from './components/layout/MainLayout';
+import Login from './pages/Login';
+import Record from './pages/Record';
+import Dashboard from './pages/Dashboard';
+
+// Importa il client ID dalle variabili d'ambiente
+if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
+  console.error('REACT_APP_GOOGLE_CLIENT_ID non è definito nelle variabili d\'ambiente');
+}
+
+// Componente wrapper per le rotte protette
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Caricamento...</div>; // Sostituiremo questo con un componente di loading
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <MainLayout>{children}</MainLayout>;
+};
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>Hello Worlds</h1>
-      </header>
-    </div>
+    <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+      <CssBaseline />
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/record" element={
+              <ProtectedRoute>
+                <Record />
+              </ProtectedRoute>
+            } />
+            <Route path="/history" element={
+              <ProtectedRoute>
+                <div>Cronologia</div>
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <div>Profilo</div>
+              </ProtectedRoute>
+            } />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </GoogleOAuthProvider>
   );
 }
 
