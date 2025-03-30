@@ -16,6 +16,7 @@ import {
   Computer as ComputerIcon,
 } from '@mui/icons-material';
 import PageContainer from '../components/layout/PageContainer';
+import AudioRecorder from '../components/audio/AudioRecorder';
 
 const Record = () => {
   const [mode, setMode] = useState(0); // 0: microfono, 1: sistema, 2: upload
@@ -30,39 +31,73 @@ const Record = () => {
     setAudioBlob(null);
   };
 
-  const startRecording = () => {
-    setIsRecording(true);
-    if (mode === 0) {
-      // Implementare registrazione microfono
-    } else if (mode === 1) {
-      // Implementare registrazione sistema
+  const handleRecordingComplete = async (blob) => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('audio', blob);
+
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/audio/upload`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Errore nel caricamento del file audio');
+      }
+
+      const data = await response.json();
+      
+      // Creiamo un link di download effettivo
+      const downloadUrl = `${process.env.REACT_APP_API_URL}${data.audioUrl}`;
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `recording-${new Date().toISOString().split('T')[0]}.wav`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Errore nel download:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const stopRecording = () => {
-    setIsRecording(false);
-    // Implementare stop registrazione
+  const handleTranscribe = async (blob) => {
+    try {
+      setLoading(true);
+      const formData = new FormData();
+      formData.append('audio', blob);
+
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/transcribe`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Errore durante la trascrizione');
+      }
+
+      const data = await response.json();
+      // Qui implementeremo la navigazione alla pagina di trascrizione
+      console.log('Trascrizione completata:', data);
+    } catch (error) {
+      console.error('Errore durante la trascrizione:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      // Implementare gestione file
       setAudioBlob(file);
-    }
-  };
-
-  const handleTranscribe = async () => {
-    if (!audioBlob) return;
-    
-    setLoading(true);
-    try {
-      // Implementare invio audio per trascrizione
-      console.log('Trascrizione in corso...');
-    } catch (error) {
-      console.error('Errore durante la trascrizione:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -115,23 +150,10 @@ const Record = () => {
 
         <Box sx={{ p: 3, minHeight: 300, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
           {mode === 0 && ( // Microfono
-            <>
-              <IconButton
-                color={isRecording ? 'error' : 'primary'}
-                sx={{ 
-                  width: 80, 
-                  height: 80,
-                  mb: 2,
-                  '& .MuiSvgIcon-root': { fontSize: 40 }
-                }}
-                onClick={isRecording ? stopRecording : startRecording}
-              >
-                {isRecording ? <StopIcon /> : <MicIcon />}
-              </IconButton>
-              <Typography>
-                {isRecording ? 'Registrazione in corso...' : 'Premi per registrare'}
-              </Typography>
-            </>
+            <AudioRecorder 
+              onRecordingComplete={handleRecordingComplete}
+              onTranscribe={handleTranscribe}
+            />
           )}
 
           {mode === 1 && ( // Sistema
@@ -144,7 +166,7 @@ const Record = () => {
                   mb: 2,
                   '& .MuiSvgIcon-root': { fontSize: 40 }
                 }}
-                onClick={isRecording ? stopRecording : startRecording}
+                onClick={() => setIsRecording(!isRecording)}
               >
                 {isRecording ? <StopIcon /> : <ComputerIcon />}
               </IconButton>
@@ -179,25 +201,6 @@ const Record = () => {
                 </Typography>
               )}
             </>
-          )}
-
-          {audioBlob && !isRecording && (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleTranscribe}
-              disabled={loading}
-              sx={{ mt: 3 }}
-            >
-              {loading ? (
-                <>
-                  <CircularProgress size={24} sx={{ mr: 1 }} />
-                  Trascrizione in corso...
-                </>
-              ) : (
-                'Trascrivi'
-              )}
-            </Button>
           )}
         </Box>
       </Paper>

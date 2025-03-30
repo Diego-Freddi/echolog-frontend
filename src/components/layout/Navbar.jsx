@@ -54,7 +54,7 @@ const Navbar = () => {
               alignItems: 'center' 
             }}>
               <img 
-                src="/EchoLog-Logo-512x143.png" 
+                src="/EchoLog-Logo-Bianco-512x143.png" 
                 alt="EchoLog Logo" 
                 style={{ 
                   height: '32px',

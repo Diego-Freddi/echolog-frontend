@@ -75,7 +75,7 @@ const Dashboard = () => {
                         left: '50%',
                         transform: 'translate(-50%, -50%)',
                         zIndex: 0,
-                        opacity: 0.5,
+                        opacity: 0.3,
                         pointerEvents: 'none',
                         width: '100%',
                         display: 'flex',
