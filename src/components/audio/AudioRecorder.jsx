@@ -5,6 +5,8 @@ import {
   styled,
   keyframes,
   useTheme,
+  CircularProgress,
+  Typography
 } from '@mui/material';
 import { 
   Mic as MicIcon, 
@@ -16,6 +18,9 @@ import {
   Computer as ComputerIcon
 } from '@mui/icons-material';
 import RecordRTC from 'recordrtc';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile } from '@ffmpeg/util';
+import axios from 'axios';
 
 // Animazione di pulsazione per il microfono attivo
 const pulse = keyframes`
@@ -91,6 +96,11 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const [audioSource, setAudioSource] = useState('microphone'); // 'microphone' o 'system'
   const [audioUrl, setAudioUrl] = useState('');
   const [audioLevels, setAudioLevels] = useState(new Array(20).fill(0));
+  const [isConverting, setIsConverting] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcriptionStatus, setTranscriptionStatus] = useState('');
+  const [transcriptionError, setTranscriptionError] = useState(null);
+  const [transcriptionText, setTranscriptionText] = useState('');
   
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
@@ -99,6 +109,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const dataArrayRef = useRef(null);
   const visualizerIntervalRef = useRef(null);
   const currentBlobRef = useRef(null);
+  const ffmpegRef = useRef(null);
 
   // Cleanup delle risorse quando il componente viene smontato
   useEffect(() => {
@@ -173,6 +184,16 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       }
     };
   }, [isRecording]);
+
+  // Inizializza FFmpeg
+  useEffect(() => {
+    const initFFmpeg = async () => {
+      const ffmpeg = new FFmpeg();
+      await ffmpeg.load();
+      ffmpegRef.current = ffmpeg;
+    };
+    initFFmpeg();
+  }, []);
 
   const cleanup = () => {
     // Ferma la registrazione se attiva
@@ -252,29 +273,97 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
     }
   };
 
+  const transcribeAudio = async (audioBlob) => {
+    try {
+      setIsTranscribing(true);
+      setTranscriptionStatus('Preparazione file...');
+      setTranscriptionError(null);
+      setTranscriptionText('');
+
+      const formData = new FormData();
+      formData.append('audio', audioBlob, 'recording.mp3');
+
+      // Prima fase: Upload al nostro server
+      setTranscriptionStatus('Caricamento file sul server...');
+      const response = await axios.post('http://localhost:5050/api/transcribe', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          setTranscriptionStatus(`Caricamento file: ${percentCompleted}%`);
+        }
+      });
+
+      if (!response.data.operationId) {
+        throw new Error('Nessun ID operazione ricevuto dal server');
+      }
+
+      // Seconda fase: Polling dello stato
+      let retryCount = 0;
+      const maxRetries = 30; // 1 minuto massimo di attesa (30 * 2 secondi)
+      
+      const checkStatus = async () => {
+        try {
+          if (retryCount >= maxRetries) {
+            throw new Error('Timeout: la trascrizione sta impiegando troppo tempo');
+          }
+
+          const statusResponse = await axios.get(`http://localhost:5050/api/transcribe/status/${response.data.operationId}`);
+          
+          if (statusResponse.data.status === 'completed') {
+            setTranscriptionStatus('Trascrizione completata!');
+            setIsTranscribing(false);
+            setTranscriptionText(statusResponse.data.transcription);
+            if (onTranscribe) {
+              onTranscribe(statusResponse.data.transcription);
+            }
+            return;
+          } 
+          
+          if (statusResponse.data.status === 'failed') {
+            throw new Error(statusResponse.data.error || 'Errore durante la trascrizione');
+          }
+
+          // Aggiorna lo stato con informazioni più dettagliate
+          if (statusResponse.data.metadata) {
+            const progress = statusResponse.data.metadata.progressPercent || 0;
+            setTranscriptionStatus(`Elaborazione audio in corso... ${progress}%`);
+          } else {
+            setTranscriptionStatus(`Elaborazione audio in corso... (tentativo ${retryCount + 1}/${maxRetries})`);
+          }
+          
+          retryCount++;
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          await checkStatus();
+        } catch (error) {
+          if (error.message.includes('Timeout')) {
+            setTranscriptionError('La trascrizione sta impiegando troppo tempo. Prova con un file più corto.');
+          } else {
+            throw error;
+          }
+        }
+      };
+
+      await checkStatus();
+    } catch (error) {
+      console.error('Errore completo:', error);
+      setTranscriptionError(error.response?.data?.error || error.message || 'Errore durante la trascrizione');
+      setTranscriptionStatus('Errore durante la trascrizione');
+      setIsTranscribing(false);
+    }
+  };
+
   const stopRecording = () => {
     if (recorderRef.current) {
       recorderRef.current.stopRecording(() => {
         const blob = recorderRef.current.getBlob();
         currentBlobRef.current = blob;
-        
-        // Revoca l'URL precedente se esiste
-        if (audioUrl) {
-          URL.revokeObjectURL(audioUrl);
-        }
-        
-        // Crea un nuovo URL per il blob
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
-        
-        if (streamRef.current) {
-          streamRef.current.getTracks().forEach(track => track.stop());
-        }
-        
         setIsRecording(false);
         setIsPaused(false);
-
-        // Se c'è una callback onRecordingComplete, chiamala con il blob
+        
         if (onRecordingComplete) {
           onRecordingComplete(blob);
         }
@@ -282,18 +371,108 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
     }
   };
 
-  const handleFileUpload = (event) => {
-    const file = event.target.files[0];
-    if (file) {
+  const convertToMP3 = async (file) => {
+    try {
+      setIsConverting(true);
+      const ffmpeg = ffmpegRef.current;
+      
+      // Scrivi il file di input
+      await ffmpeg.writeFile('input.mp4', await fetchFile(file));
+      
+      // Esegui la conversione
+      await ffmpeg.exec([
+        '-i', 'input.mp4',
+        '-acodec', 'libmp3lame',
+        '-ab', '128k',
+        'output.mp3'
+      ]);
+      
+      // Leggi il file convertito
+      const data = await ffmpeg.readFile('output.mp3');
+      
+      // Crea un nuovo Blob
+      const mp3Blob = new Blob([data], { type: 'audio/mp3' });
+      
       // Revoca l'URL precedente se esiste
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
       }
       
-      // Crea un nuovo URL per il file
-      const url = URL.createObjectURL(file);
-      currentBlobRef.current = file;
+      // Crea un nuovo URL per il blob
+      const url = URL.createObjectURL(mp3Blob);
+      currentBlobRef.current = mp3Blob;
       setAudioUrl(url);
+      
+      setIsConverting(false);
+      return mp3Blob;
+    } catch (error) {
+      console.error('Errore nella conversione:', error);
+      setIsConverting(false);
+      throw error;
+    }
+  };
+
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      try {
+        setIsConverting(true);
+        const ffmpeg = ffmpegRef.current;
+        
+        // Scrivi il file di input
+        await ffmpeg.writeFile('input', await fetchFile(file));
+        
+        // Converti il file con le stesse caratteristiche della registrazione da microfono
+        await ffmpeg.exec([
+          '-i', 'input',
+          '-acodec', 'libmp3lame',
+          '-ac', '1',                    // mono
+          '-ar', '16000',               // sample rate 16kHz
+          '-ab', '128k',                // bitrate
+          'output.mp3'
+        ]);
+        
+        // Leggi il file convertito
+        const data = await ffmpeg.readFile('output.mp3');
+        
+        // Crea un nuovo Blob
+        const processedBlob = new Blob([data], { type: 'audio/mp3' });
+        
+        // Revoca l'URL precedente se esiste
+        if (audioUrl) {
+          URL.revokeObjectURL(audioUrl);
+        }
+        
+        // Crea un nuovo URL per il blob
+        const url = URL.createObjectURL(processedBlob);
+        currentBlobRef.current = processedBlob;
+        setAudioUrl(url);
+        
+        // Se c'è una callback onRecordingComplete, chiamala con il blob
+        if (onRecordingComplete) {
+          onRecordingComplete(processedBlob);
+        }
+
+        setIsConverting(false);
+      } catch (error) {
+        console.error('Errore nel processamento del file:', error);
+        setTranscriptionError('Errore nel processamento del file: ' + error.message);
+        setIsConverting(false);
+      }
+    }
+  };
+
+  const handleTranscribe = async () => {
+    if (!currentBlobRef.current) {
+      setTranscriptionError('Nessun audio da trascrivere');
+      return;
+    }
+
+    try {
+      await transcribeAudio(currentBlobRef.current);
+    } catch (error) {
+      console.error('Errore nella trascrizione:', error);
+      setTranscriptionError('Errore nella trascrizione: ' + error.message);
     }
   };
 
@@ -445,24 +624,46 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
           </Button>
         )}
         {audioUrl && (
-          <Button
-            variant="contained"
-            onClick={handleDownload}
-            sx={{ 
-              borderRadius: 2,
-              backgroundColor: '#f5f5f7',
-              color: '#000000',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-              transition: 'all 0.2s ease-in-out',
-              '&:hover': {
-                backgroundColor: '#e5e5e7',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
-                transform: 'translateY(-1px)'
-              }
-            }}
-          >
-            Scarica MP3
-          </Button>
+          <>
+            <Button
+              variant="contained"
+              onClick={handleDownload}
+              sx={{ 
+                borderRadius: 2,
+                backgroundColor: '#f5f5f7',
+                color: '#000000',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  backgroundColor: '#e5e5e7',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
+              Scarica MP3
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<TextFieldsIcon />}
+              onClick={handleTranscribe}
+              disabled={isTranscribing}
+              sx={{ 
+                borderRadius: 2,
+                backgroundColor: '#f5f5f7',
+                color: '#000000',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  backgroundColor: '#e5e5e7',
+                  boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                  transform: 'translateY(-1px)'
+                }
+              }}
+            >
+              {isTranscribing ? 'Trascrizione...' : 'Trascrivi'}
+            </Button>
+          </>
         )}
         <Button
           variant="contained"
@@ -497,6 +698,69 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
             src={audioUrl} 
             controls 
           />
+        </Box>
+      )}
+
+      {/* Aggiungi indicatore di conversione */}
+      {isConverting && (
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: 1,
+          color: theme.palette.primary.main,
+          mt: 1
+        }}>
+          <CircularProgress size={16} />
+          <Typography variant="body2">
+            Conversione in corso...
+          </Typography>
+        </Box>
+      )}
+
+      {isTranscribing && (
+        <Box sx={{ 
+          mt: 2, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center',
+          gap: 1
+        }}>
+          <CircularProgress size={24} />
+          <Typography variant="body2" color="text.secondary" align="center">
+            {transcriptionStatus}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 0.5 }}>
+            (Questo processo potrebbe richiedere alcuni minuti per file lunghi)
+          </Typography>
+        </Box>
+      )}
+
+      {transcriptionError && (
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <Typography variant="body2" color="error">
+            {transcriptionError}
+          </Typography>
+        </Box>
+      )}
+
+      {transcriptionText && (
+        <Box 
+          sx={{ 
+            width: '100%', 
+            mt: 3, 
+            p: 3, 
+            backgroundColor: '#f5f5f7',
+            borderRadius: 2,
+            border: '1px solid rgba(0,0,0,0.1)',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          }}
+        >
+          <Typography variant="h6" gutterBottom sx={{ color: theme.palette.primary.main }}>
+            Trascrizione
+          </Typography>
+          <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+            {transcriptionText}
+          </Typography>
         </Box>
       )}
     </Box>
