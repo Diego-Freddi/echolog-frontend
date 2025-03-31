@@ -1,22 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { 
   Box, 
-  IconButton, 
-  Typography,
-  CircularProgress,
   Button,
-  Stack,
   styled,
   keyframes,
   useTheme,
-  alpha
 } from '@mui/material';
 import { 
   Mic as MicIcon, 
   Stop as StopIcon,
   Pause as PauseIcon,
   PlayArrow as PlayIcon,
-  Download as DownloadIcon,
+  Upload as UploadIcon,
   TextFields as TextFieldsIcon,
   Computer as ComputerIcon
 } from '@mui/icons-material';
@@ -45,7 +40,7 @@ const wave = keyframes`
   100% { height: 5px; }
 `;
 
-// Visualizzatore di onde audio
+// Contenitore per il visualizzatore di onde audio
 const AudioWaveContainer = styled(Box)({
   display: 'flex',
   alignItems: 'flex-end',
@@ -93,24 +88,17 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const theme = useTheme();
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [error, setError] = useState(null);
-  const [hasRecording, setHasRecording] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [audioSource, setAudioSource] = useState('microphone'); // 'microphone' o 'system'
   const [audioUrl, setAudioUrl] = useState('');
   const [audioLevels, setAudioLevels] = useState(new Array(20).fill(0));
   
   const recorderRef = useRef(null);
-  const timerRef = useRef(null);
-  const startTimeRef = useRef(null);
-  const currentBlobRef = useRef(null);
   const streamRef = useRef(null);
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
   const dataArrayRef = useRef(null);
-  const animationFrameRef = useRef(null);
   const visualizerIntervalRef = useRef(null);
-  const audioPlayerRef = useRef(null);
+  const currentBlobRef = useRef(null);
 
   // Effetto per l'analisi audio in tempo reale
   useEffect(() => {
@@ -179,14 +167,8 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
           }
         });
       }
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
       if (visualizerIntervalRef.current) {
         clearInterval(visualizerIntervalRef.current);
-      }
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
       }
       if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
         audioContextRef.current.close();
@@ -194,19 +176,32 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
     };
   }, []);
 
+  const handleAudioSourceChange = (event, newSource) => {
+    if (newSource !== null) {
+      setAudioSource(newSource);
+    }
+  };
+
   const startRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        audio: { 
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        } 
-      });
+      let stream;
+      if (audioSource === 'microphone') {
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: { 
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          } 
+        });
+      } else {
+        stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: true
+        });
+      }
       
       streamRef.current = stream;
       
-      // Configura RecordRTC come nell'esempio
       const options = {
         type: 'audio',
         mimeType: 'audio/mp3',
@@ -218,37 +213,9 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       
       recorderRef.current = new RecordRTC(stream, options);
       recorderRef.current.startRecording();
-      
       setIsRecording(true);
-      startTimeRef.current = Date.now();
-      
-      timerRef.current = setInterval(() => {
-        setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
-      }, 1000);
     } catch (err) {
-      setError('Errore nell\'accesso al microfono. Assicurati di aver dato i permessi necessari.');
       console.error('Errore nella registrazione:', err);
-    }
-  };
-
-  const pauseRecording = () => {
-    if (recorderRef.current) {
-      recorderRef.current.pauseRecording();
-      setIsPaused(true);
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    }
-  };
-
-  const resumeRecording = () => {
-    if (recorderRef.current) {
-      recorderRef.current.resumeRecording();
-      setIsPaused(false);
-      startTimeRef.current = Date.now() - (duration * 1000);
-      timerRef.current = setInterval(() => {
-        setDuration(Math.floor((Date.now() - startTimeRef.current) / 1000));
-      }, 1000);
     }
   };
 
@@ -259,53 +226,46 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
         currentBlobRef.current = blob;
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
-        setHasRecording(true);
         
         if (streamRef.current) {
           streamRef.current.getTracks().forEach(track => track.stop());
         }
         
         setIsRecording(false);
-        setIsPaused(false);
-        setDuration(0);
-        
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-        }
       });
     }
   };
 
-  const handleTranscribe = async () => {
-    if (!currentBlobRef.current) return;
-    
-    setIsProcessing(true);
-    try {
-      await onTranscribe(currentBlobRef.current);
-    } catch (err) {
-      setError('Errore durante la trascrizione');
-      console.error('Errore nella trascrizione:', err);
-    } finally {
-      setIsProcessing(false);
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      currentBlobRef.current = file;
+      setAudioUrl(url);
     }
   };
 
   const handleDownload = () => {
     if (!currentBlobRef.current) return;
-    
     try {
-      // Usa il metodo save di RecordRTC come nell'esempio
       recorderRef.current.save(`registrazione_${new Date().toISOString().replace(/[:.]/g, '-')}.mp3`);
     } catch (err) {
-      setError('Errore nel download del file audio');
       console.error('Errore nel download:', err);
     }
   };
 
-  const formatDuration = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  const pauseRecording = () => {
+    if (recorderRef.current) {
+      recorderRef.current.pauseRecording();
+      setIsPaused(true);
+    }
+  };
+
+  const resumeRecording = () => {
+    if (recorderRef.current) {
+      recorderRef.current.resumeRecording();
+      setIsPaused(false);
+    }
   };
 
   // Genera le barre delle onde audio
@@ -324,131 +284,158 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   ));
 
   return (
-    <>
-      {error && (
-        <Typography color="error" sx={{ mb: 2 }}>
-          {error}
-        </Typography>
-      )}
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+      {/* Toggle Button Group per la selezione della sorgente */}
+      <Box sx={{ 
+        display: 'flex', 
+        gap: 2, 
+        backgroundColor: '#f5f5f7',
+        borderRadius: 4,
+        padding: 1
+      }}>
+        <Button
+          variant={audioSource === 'microphone' ? 'contained' : 'text'}
+          onClick={() => handleAudioSourceChange(null, 'microphone')}
+          startIcon={<MicIcon />}
+          sx={{ 
+            borderRadius: 2,
+            backgroundColor: audioSource === 'microphone' ? '#ffffff' : 'transparent',
+            color: audioSource === 'microphone' ? '#000000' : '#666666',
+            boxShadow: audioSource === 'microphone' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              backgroundColor: audioSource === 'microphone' ? '#ffffff' : 'rgba(0,0,0,0.04)',
+              boxShadow: audioSource === 'microphone' ? '0 4px 8px rgba(0,0,0,0.05)' : 'none',
+              transform: 'translateY(-1px)'
+            }
+          }}
+        >
+          Microfono
+        </Button>
+        <Button
+          variant={audioSource === 'system' ? 'contained' : 'text'}
+          onClick={() => handleAudioSourceChange(null, 'system')}
+          startIcon={<ComputerIcon />}
+          sx={{ 
+            borderRadius: 2,
+            backgroundColor: audioSource === 'system' ? '#ffffff' : 'transparent',
+            color: audioSource === 'system' ? '#000000' : '#666666',
+            boxShadow: audioSource === 'system' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              backgroundColor: audioSource === 'system' ? '#ffffff' : 'rgba(0,0,0,0.04)',
+              boxShadow: audioSource === 'system' ? '0 4px 8px rgba(0,0,0,0.05)' : 'none',
+              transform: 'translateY(-1px)'
+            }
+          }}
+        >
+          Audio di Sistema
+        </Button>
+      </Box>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
-        {!isRecording ? (
-          <IconButton
-            color="primary"
-            onClick={startRecording}
+      {/* Visualizzatore onde audio */}
+      <AudioWaveContainer>
+        {waveElements}
+      </AudioWaveContainer>
+
+      {/* Bottoni di controllo */}
+      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+        <Button
+          variant="contained"
+          startIcon={isRecording ? <StopIcon /> : <MicIcon />}
+          onClick={isRecording ? stopRecording : startRecording}
+          sx={{ 
+            borderRadius: 2,
+            backgroundColor: '#f5f5f7',
+            color: '#000000',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              backgroundColor: '#e5e5e7',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+              transform: 'translateY(-1px)'
+            }
+          }}
+        >
+          {isRecording ? 'Stop' : 'Registra'}
+        </Button>
+        {isRecording && (
+          <Button
+            variant="contained"
+            startIcon={isPaused ? <PlayIcon /> : <PauseIcon />}
+            onClick={isPaused ? resumeRecording : pauseRecording}
             sx={{ 
-              width: 80, 
-              height: 80,
-              mb: 2,
-              '& .MuiSvgIcon-root': { fontSize: 40 },
-              animation: isRecording ? `${pulse} 2s infinite` : 'none'
+              borderRadius: 2,
+              backgroundColor: '#f5f5f7',
+              color: '#000000',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                backgroundColor: '#e5e5e7',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                transform: 'translateY(-1px)'
+              }
             }}
           >
-            <MicIcon />
-          </IconButton>
-        ) : (
-          <>
-            {isPaused ? (
-              <IconButton
-                color="primary"
-                onClick={resumeRecording}
-                sx={{ 
-                  width: 80, 
-                  height: 80,
-                  mb: 2,
-                  '& .MuiSvgIcon-root': { fontSize: 40 }
-                }}
-              >
-                <PlayIcon />
-              </IconButton>
-            ) : (
-              <IconButton
-                color="primary"
-                onClick={pauseRecording}
-                sx={{ 
-                  width: 80, 
-                  height: 80,
-                  mb: 2,
-                  '& .MuiSvgIcon-root': { fontSize: 40 }
-                }}
-              >
-                <PauseIcon />
-              </IconButton>
-            )}
-            <IconButton
-              color="error"
-              onClick={stopRecording}
-              sx={{ 
-                width: 80, 
-                height: 80,
-                mb: 2,
-                '& .MuiSvgIcon-root': { fontSize: 40 }
-              }}
-            >
-              <StopIcon />
-            </IconButton>
-          </>
+            {isPaused ? 'Riprendi' : 'Pausa'}
+          </Button>
         )}
-
-        {/* Visualizzatore onde audio */}
-        {isRecording && (
-          <>
-            <AudioWaveContainer>
-              {waveElements}
-            </AudioWaveContainer>
-            <Typography variant="h4">
-              {formatDuration(duration)}
-            </Typography>
-          </>
+        {audioUrl && (
+          <Button
+            variant="contained"
+            onClick={handleDownload}
+            sx={{ 
+              borderRadius: 2,
+              backgroundColor: '#f5f5f7',
+              color: '#000000',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              transition: 'all 0.2s ease-in-out',
+              '&:hover': {
+                backgroundColor: '#e5e5e7',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                transform: 'translateY(-1px)'
+              }
+            }}
+          >
+            Scarica MP3
+          </Button>
         )}
-
-        {hasRecording && !isRecording && (
-          <Box sx={{ 
-            width: '100%', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            gap: 2
-          }}>
-            <Box sx={{ 
-              width: '100%', 
-              borderRadius: 2, 
-              overflow: 'hidden',
-              backgroundColor: alpha(theme.palette.background.paper, 0.5),
-              backdropFilter: 'blur(10px)',
-              padding: 1
-            }}>
-              <AppleAudioPlayer 
-                ref={audioPlayerRef}
-                src={audioUrl} 
-                controls 
-              />
-            </Box>
-            
-            <Stack direction="row" spacing={2}>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={isProcessing ? <CircularProgress size={20} /> : <TextFieldsIcon />}
-                onClick={handleTranscribe}
-                disabled={isProcessing}
-              >
-                {isProcessing ? 'Trascrizione in corso...' : 'Trascrivi'}
-              </Button>
-              <Button
-                variant="outlined"
-                color="primary"
-                startIcon={isProcessing ? <CircularProgress size={20} /> : <DownloadIcon />}
-                onClick={handleDownload}
-                disabled={isProcessing}
-              >
-                {isProcessing ? 'Download in corso...' : 'Download Audio'}
-              </Button>
-            </Stack>
-          </Box>
-        )}
+        <Button
+          variant="contained"
+          component="label"
+          startIcon={<UploadIcon />}
+          sx={{ 
+            borderRadius: 2,
+            backgroundColor: '#f5f5f7',
+            color: '#000000',
+            boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+            transition: 'all 0.2s ease-in-out',
+            '&:hover': {
+              backgroundColor: '#e5e5e7',
+              boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+              transform: 'translateY(-1px)'
+            }
+          }}
+        >
+          Carica File
+          <input
+            type="file"
+            hidden
+            accept="audio/*"
+            onChange={handleFileUpload}
+          />
+        </Button>
       </Box>
-    </>
+
+      {audioUrl && (
+        <Box sx={{ width: '100%', mt: 2 }}>
+          <AppleAudioPlayer 
+            src={audioUrl} 
+            controls 
+          />
+        </Box>
+      )}
+    </Box>
   );
 };
 
