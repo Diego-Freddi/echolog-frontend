@@ -100,6 +100,22 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const visualizerIntervalRef = useRef(null);
   const currentBlobRef = useRef(null);
 
+  // Cleanup delle risorse quando il componente viene smontato
+  useEffect(() => {
+    return () => {
+      cleanup();
+    };
+  }, []);
+
+  // Cleanup quando cambia l'audioUrl
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
+
   // Effetto per l'analisi audio in tempo reale
   useEffect(() => {
     if (isRecording) {
@@ -158,23 +174,40 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
     };
   }, [isRecording]);
 
-  useEffect(() => {
-    return () => {
-      if (recorderRef.current) {
-        recorderRef.current.stopRecording(() => {
-          if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop());
-          }
-        });
-      }
-      if (visualizerIntervalRef.current) {
-        clearInterval(visualizerIntervalRef.current);
-      }
-      if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-        audioContextRef.current.close();
-      }
-    };
-  }, []);
+  const cleanup = () => {
+    // Ferma la registrazione se attiva
+    if (recorderRef.current) {
+      recorderRef.current.stopRecording(() => {
+        if (streamRef.current) {
+          streamRef.current.getTracks().forEach(track => track.stop());
+        }
+      });
+    }
+
+    // Pulisci l'audio context
+    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
+      audioContextRef.current.close();
+    }
+
+    // Ferma l'analizzatore
+    if (visualizerIntervalRef.current) {
+      clearInterval(visualizerIntervalRef.current);
+    }
+
+    // Revoca gli URL dei blob
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      setAudioUrl('');
+    }
+
+    // Reset dei riferimenti
+    recorderRef.current = null;
+    streamRef.current = null;
+    audioContextRef.current = null;
+    analyserRef.current = null;
+    dataArrayRef.current = null;
+    currentBlobRef.current = null;
+  };
 
   const handleAudioSourceChange = (event, newSource) => {
     if (newSource !== null) {
@@ -224,6 +257,13 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       recorderRef.current.stopRecording(() => {
         const blob = recorderRef.current.getBlob();
         currentBlobRef.current = blob;
+        
+        // Revoca l'URL precedente se esiste
+        if (audioUrl) {
+          URL.revokeObjectURL(audioUrl);
+        }
+        
+        // Crea un nuovo URL per il blob
         const url = URL.createObjectURL(blob);
         setAudioUrl(url);
         
@@ -232,6 +272,12 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
         }
         
         setIsRecording(false);
+        setIsPaused(false);
+
+        // Se c'è una callback onRecordingComplete, chiamala con il blob
+        if (onRecordingComplete) {
+          onRecordingComplete(blob);
+        }
       });
     }
   };
@@ -239,6 +285,12 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
+      // Revoca l'URL precedente se esiste
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+      
+      // Crea un nuovo URL per il file
       const url = URL.createObjectURL(file);
       currentBlobRef.current = file;
       setAudioUrl(url);
@@ -248,7 +300,19 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const handleDownload = () => {
     if (!currentBlobRef.current) return;
     try {
-      recorderRef.current.save(`registrazione_${new Date().toISOString().replace(/[:.]/g, '-')}.mp3`);
+      // Crea un URL temporaneo per il download
+      const downloadUrl = URL.createObjectURL(currentBlobRef.current);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `registrazione_${new Date().toISOString().replace(/[:.]/g, '-')}.mp3`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      
+      // Revoca l'URL temporaneo dopo il download
+      setTimeout(() => {
+        URL.revokeObjectURL(downloadUrl);
+      }, 100);
     } catch (err) {
       console.error('Errore nel download:', err);
     }
