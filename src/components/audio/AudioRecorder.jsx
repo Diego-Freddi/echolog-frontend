@@ -276,22 +276,20 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const transcribeAudio = async (audioBlob) => {
     try {
       setIsTranscribing(true);
-      setTranscriptionStatus('Preparazione file...');
+      setTranscriptionStatus('Inizio trascrizione...');
       setTranscriptionError(null);
       setTranscriptionText('');
 
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.mp3');
 
-      // Prima fase: Upload al nostro server
-      setTranscriptionStatus('Caricamento file sul server...');
       const response = await axios.post('http://localhost:5050/api/transcribe', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setTranscriptionStatus(`Caricamento file: ${percentCompleted}%`);
+          setTranscriptionStatus(`Upload in corso: ${percentCompleted}%`);
         }
       });
 
@@ -299,17 +297,15 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
         throw new Error('Nessun ID operazione ricevuto dal server');
       }
 
-      // Seconda fase: Polling dello stato
-      let retryCount = 0;
-      const maxRetries = 30; // 1 minuto massimo di attesa (30 * 2 secondi)
-      
+      console.log('OperationId ricevuto:', response.data.operationId);
+      setTranscriptionStatus('Trascrizione in corso...');
+
+      // Polling dello stato della trascrizione
       const checkStatus = async () => {
         try {
-          if (retryCount >= maxRetries) {
-            throw new Error('Timeout: la trascrizione sta impiegando troppo tempo');
-          }
-
+          console.log('Controllo stato trascrizione...');
           const statusResponse = await axios.get(`http://localhost:5050/api/transcribe/status/${response.data.operationId}`);
+          console.log('Risposta stato:', statusResponse.data);
           
           if (statusResponse.data.status === 'completed') {
             setTranscriptionStatus('Trascrizione completata!');
@@ -325,23 +321,14 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
             throw new Error(statusResponse.data.error || 'Errore durante la trascrizione');
           }
 
-          // Aggiorna lo stato con informazioni più dettagliate
-          if (statusResponse.data.metadata) {
-            const progress = statusResponse.data.metadata.progressPercent || 0;
-            setTranscriptionStatus(`Elaborazione audio in corso... ${progress}%`);
-          } else {
-            setTranscriptionStatus(`Elaborazione audio in corso... (tentativo ${retryCount + 1}/${maxRetries})`);
-          }
+          // Aggiorna lo stato con il progresso
+          setTranscriptionStatus('Trascrizione in corso...');
           
-          retryCount++;
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          await checkStatus();
+          // Continua il polling
+          setTimeout(checkStatus, 2000);
         } catch (error) {
-          if (error.message.includes('Timeout')) {
-            setTranscriptionError('La trascrizione sta impiegando troppo tempo. Prova con un file più corto.');
-          } else {
-            throw error;
-          }
+          console.error('Errore nel controllo stato:', error);
+          throw error;
         }
       };
 
@@ -416,63 +403,23 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
     const file = event.target.files[0];
     if (file) {
       try {
-        setIsConverting(true);
-        const ffmpeg = ffmpegRef.current;
+        let processedBlob;
         
-        // Scrivi il file di input
-        await ffmpeg.writeFile('input', await fetchFile(file));
-        
-        // Converti il file con le stesse caratteristiche della registrazione da microfono
-        await ffmpeg.exec([
-          '-i', 'input',
-          '-acodec', 'libmp3lame',
-          '-ac', '1',                    // mono
-          '-ar', '16000',               // sample rate 16kHz
-          '-ab', '128k',                // bitrate
-          'output.mp3'
-        ]);
-        
-        // Leggi il file convertito
-        const data = await ffmpeg.readFile('output.mp3');
-        
-        // Crea un nuovo Blob
-        const processedBlob = new Blob([data], { type: 'audio/mp3' });
-        
-        // Revoca l'URL precedente se esiste
-        if (audioUrl) {
-          URL.revokeObjectURL(audioUrl);
+        // Se il file è MP4, convertilo in MP3
+        if (file.type === 'video/mp4' || file.type === 'audio/mp4') {
+          processedBlob = await convertToMP3(file);
+        } else {
+          // Per altri formati, usa il file direttamente
+          processedBlob = file;
         }
-        
-        // Crea un nuovo URL per il blob
-        const url = URL.createObjectURL(processedBlob);
-        currentBlobRef.current = processedBlob;
-        setAudioUrl(url);
         
         // Se c'è una callback onRecordingComplete, chiamala con il blob
         if (onRecordingComplete) {
           onRecordingComplete(processedBlob);
         }
-
-        setIsConverting(false);
       } catch (error) {
         console.error('Errore nel processamento del file:', error);
-        setTranscriptionError('Errore nel processamento del file: ' + error.message);
-        setIsConverting(false);
       }
-    }
-  };
-
-  const handleTranscribe = async () => {
-    if (!currentBlobRef.current) {
-      setTranscriptionError('Nessun audio da trascrivere');
-      return;
-    }
-
-    try {
-      await transcribeAudio(currentBlobRef.current);
-    } catch (error) {
-      console.error('Errore nella trascrizione:', error);
-      setTranscriptionError('Errore nella trascrizione: ' + error.message);
     }
   };
 
@@ -646,7 +593,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
             <Button
               variant="contained"
               startIcon={<TextFieldsIcon />}
-              onClick={handleTranscribe}
+              onClick={() => transcribeAudio(currentBlobRef.current)}
               disabled={isTranscribing}
               sx={{ 
                 borderRadius: 2,
@@ -718,19 +665,10 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       )}
 
       {isTranscribing && (
-        <Box sx={{ 
-          mt: 2, 
-          display: 'flex', 
-          flexDirection: 'column', 
-          alignItems: 'center',
-          gap: 1
-        }}>
-          <CircularProgress size={24} />
-          <Typography variant="body2" color="text.secondary" align="center">
+        <Box sx={{ mt: 2, textAlign: 'center' }}>
+          <CircularProgress size={24} sx={{ mr: 1 }} />
+          <Typography variant="body2" color="text.secondary">
             {transcriptionStatus}
-          </Typography>
-          <Typography variant="caption" color="text.secondary" align="center" sx={{ mt: 0.5 }}>
-            (Questo processo potrebbe richiedere alcuni minuti per file lunghi)
           </Typography>
         </Box>
       )}
