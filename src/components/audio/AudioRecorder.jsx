@@ -21,6 +21,8 @@ import RecordRTC from 'recordrtc';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import axios from 'axios';
+import { transcriptionService } from '../../services/api';
+import TranscriptionView from '../transcription/TranscriptionView';
 
 // Animazione di pulsazione per il microfono attivo
 const pulse = keyframes`
@@ -101,6 +103,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const [transcriptionStatus, setTranscriptionStatus] = useState('');
   const [transcriptionError, setTranscriptionError] = useState(null);
   const [transcriptionText, setTranscriptionText] = useState('');
+  const [transcriptionId, setTranscriptionId] = useState(null);
   
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
@@ -279,46 +282,43 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       setTranscriptionStatus('Inizio trascrizione...');
       setTranscriptionError(null);
       setTranscriptionText('');
+      setTranscriptionId(null);
 
       const formData = new FormData();
       formData.append('audio', audioBlob, 'recording.mp3');
 
-      const response = await axios.post('http://localhost:5050/api/transcribe', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setTranscriptionStatus(`Upload in corso: ${percentCompleted}%`);
-        }
-      });
+      const response = await transcriptionService.transcribe(audioBlob);
 
-      if (!response.data.operationId) {
+      if (!response.operationId) {
         throw new Error('Nessun ID operazione ricevuto dal server');
       }
 
-      console.log('OperationId ricevuto:', response.data.operationId);
+      console.log('OperationId ricevuto:', response.operationId);
       setTranscriptionStatus('Trascrizione in corso...');
 
       // Polling dello stato della trascrizione
       const checkStatus = async () => {
         try {
           console.log('Controllo stato trascrizione...');
-          const statusResponse = await axios.get(`http://localhost:5050/api/transcribe/status/${response.data.operationId}`);
-          console.log('Risposta stato:', statusResponse.data);
+          const statusResponse = await transcriptionService.checkStatus(response.operationId);
+          console.log('Risposta stato:', statusResponse);
           
-          if (statusResponse.data.status === 'completed') {
+          if (statusResponse.status === 'completed') {
             setTranscriptionStatus('Trascrizione completata!');
             setIsTranscribing(false);
-            setTranscriptionText(statusResponse.data.transcription);
+            setTranscriptionText(statusResponse.transcription);
+            if (statusResponse.transcriptionId) {
+              setTranscriptionId(statusResponse.transcriptionId);
+              console.log('ID trascrizione memorizzato:', statusResponse.transcriptionId);
+            }
             if (onTranscribe) {
-              onTranscribe(statusResponse.data.transcription);
+              onTranscribe(statusResponse.transcription);
             }
             return;
           } 
           
-          if (statusResponse.data.status === 'failed') {
-            throw new Error(statusResponse.data.error || 'Errore durante la trascrizione');
+          if (statusResponse.status === 'failed') {
+            throw new Error(statusResponse.error || 'Errore durante la trascrizione');
           }
 
           // Aggiorna lo stato con il progresso
@@ -686,25 +686,14 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
         </Box>
       )}
 
+      {/* Utilizziamo il nuovo componente TranscriptionView per visualizzare trascrizione e analisi */}
       {transcriptionText && (
-        <Box 
-          sx={{ 
-            width: '100%', 
-            mt: 3, 
-            p: 3, 
-            backgroundColor: '#f5f5f7',
-            borderRadius: 2,
-            border: '1px solid rgba(0,0,0,0.1)',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-          }}
-        >
-          <Typography variant="h6" gutterBottom sx={{ color: theme.palette.primary.main }}>
-            Trascrizione
-          </Typography>
-          <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-            {transcriptionText}
-          </Typography>
-        </Box>
+        <TranscriptionView 
+          text={transcriptionText}
+          loading={isTranscribing}
+          error={transcriptionError}
+          transcriptionId={transcriptionId}
+        />
       )}
     </Box>
   );
