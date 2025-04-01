@@ -413,6 +413,11 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
           processedBlob = file;
         }
         
+        // Imposta il blob corrente e l'URL audio
+        currentBlobRef.current = processedBlob;
+        const url = URL.createObjectURL(processedBlob);
+        setAudioUrl(url);
+        
         // Se c'è una callback onRecordingComplete, chiamala con il blob
         if (onRecordingComplete) {
           onRecordingComplete(processedBlob);
