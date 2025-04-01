@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Box, 
   Typography, 
@@ -6,11 +6,15 @@ import {
   Tabs, 
   CircularProgress,
   Button,
+  Switch,
+  FormControlLabel,
+  Tooltip,
   useTheme
 } from '@mui/material';
 import { 
   TextFields as TextFieldsIcon,
-  Psychology as PsychologyIcon
+  Psychology as PsychologyIcon,
+  Highlight as HighlightIcon
 } from '@mui/icons-material';
 import { analysisService } from '../../services/api';
 import AnalysisView from '../analysis/AnalysisView';
@@ -45,6 +49,8 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
   const [analysis, setAnalysis] = useState(null);
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [analysisError, setAnalysisError] = useState(null);
+  const [highlightKeywords, setHighlightKeywords] = useState(false);
+  const [processedText, setProcessedText] = useState('');
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -75,6 +81,26 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
       setAnalysisLoading(false);
     }
   };
+
+  // Effetto per evidenziare le parole chiave quando cambia l'analisi o l'opzione di evidenziazione
+  useEffect(() => {
+    if (text && analysis && analysis.keywords && highlightKeywords) {
+      let htmlContent = text;
+      
+      // Ordina le parole chiave per lunghezza (discendente) per evitare sostituzioni parziali
+      const sortedKeywords = [...analysis.keywords].sort((a, b) => b.length - a.length);
+      
+      // Crea espressioni regolari per ogni parola chiave, ignorando maiuscole/minuscole
+      sortedKeywords.forEach(keyword => {
+        const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+        htmlContent = htmlContent.replace(regex, '<mark style="background-color: rgba(240, 44, 86, 0.2); padding: 0 4px; border-radius: 2px;">$1</mark>');
+      });
+      
+      setProcessedText(htmlContent);
+    } else {
+      setProcessedText(text || '');
+    }
+  }, [text, analysis, highlightKeywords]);
 
   // Se non c'è testo, non mostrare nulla
   if (!text && !loading) return null;
@@ -138,12 +164,38 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
           </Typography>
         ) : (
           <>
-            <Typography variant="h6" gutterBottom sx={{ color: theme.palette.primary.main }}>
-              Trascrizione
-            </Typography>
-            <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-              {text}
-            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Typography variant="h6" sx={{ color: theme.palette.primary.main }}>
+                Trascrizione
+              </Typography>
+              
+              {analysis && (
+                <Tooltip title="Evidenzia parole chiave nel testo">
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={highlightKeywords}
+                        onChange={(e) => setHighlightKeywords(e.target.checked)}
+                        color="primary"
+                        size="small"
+                      />
+                    }
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <HighlightIcon fontSize="small" color={highlightKeywords ? 'primary' : 'action'} />
+                        <Typography variant="body2">Evidenzia</Typography>
+                      </Box>
+                    }
+                  />
+                </Tooltip>
+              )}
+            </Box>
+            
+            <Typography 
+              variant="body1" 
+              sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
+              dangerouslySetInnerHTML={{ __html: processedText }}
+            />
           </>
         )}
       </TabPanel>
@@ -170,7 +222,13 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
             </Button>
           </Box>
         ) : analysis ? (
-          <AnalysisView analysis={analysis} />
+          <AnalysisView 
+            analysis={analysis} 
+            onKeywordClick={(keyword) => {
+              setTabValue(0);
+              setHighlightKeywords(true);
+            }}
+          />
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3, gap: 2 }}>
             <Button 

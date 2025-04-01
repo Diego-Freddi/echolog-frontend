@@ -132,8 +132,11 @@ export const analysisService = {
 // Inizializza gli interceptor
 setupInterceptors();
 
-export default {
+// Crea l'oggetto export
+const apiServices = {
   authService,
   transcriptionService,
   analysisService
-}; 
+};
+
+export default apiServices; 

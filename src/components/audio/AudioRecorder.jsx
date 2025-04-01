@@ -6,7 +6,8 @@ import {
   keyframes,
   useTheme,
   CircularProgress,
-  Typography
+  Typography,
+  Chip
 } from '@mui/material';
 import { 
   Mic as MicIcon, 
@@ -15,12 +16,12 @@ import {
   PlayArrow as PlayIcon,
   Upload as UploadIcon,
   TextFields as TextFieldsIcon,
-  Computer as ComputerIcon
+  Computer as ComputerIcon,
+  Timer as TimerIcon
 } from '@mui/icons-material';
 import RecordRTC from 'recordrtc';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
-import axios from 'axios';
 import { transcriptionService } from '../../services/api';
 import TranscriptionView from '../transcription/TranscriptionView';
 
@@ -38,13 +39,6 @@ const pulse = keyframes`
     box-shadow: 0 0 0 0 rgba(240, 44, 86, 0);
     transform: scale(1);
   }
-`;
-
-// Animazione per l'onda sonora
-const wave = keyframes`
-  0% { height: 5px; }
-  50% { height: 20px; }
-  100% { height: 5px; }
 `;
 
 // Contenitore per il visualizzatore di onde audio
@@ -104,6 +98,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const [transcriptionError, setTranscriptionError] = useState(null);
   const [transcriptionText, setTranscriptionText] = useState('');
   const [transcriptionId, setTranscriptionId] = useState(null);
+  const [recordingDuration, setRecordingDuration] = useState(0);
   
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
@@ -113,6 +108,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const visualizerIntervalRef = useRef(null);
   const currentBlobRef = useRef(null);
   const ffmpegRef = useRef(null);
+  const timerIntervalRef = useRef(null);
 
   // Cleanup delle risorse quando il componente viene smontato
   useEffect(() => {
@@ -188,6 +184,30 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
     };
   }, [isRecording]);
 
+  // Timer per la durata della registrazione
+  useEffect(() => {
+    if (isRecording && !isPaused) {
+      timerIntervalRef.current = setInterval(() => {
+        setRecordingDuration(prev => prev + 1);
+      }, 1000);
+    } else if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+
+    return () => {
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+    };
+  }, [isRecording, isPaused]);
+
+  // Formatta il tempo da secondi a mm:ss
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
   // Inizializza FFmpeg
   useEffect(() => {
     const initFFmpeg = async () => {
@@ -218,6 +238,11 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       clearInterval(visualizerIntervalRef.current);
     }
 
+    // Ferma il timer
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+
     // Revoca gli URL dei blob
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
@@ -240,6 +265,9 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   };
 
   const startRecording = async () => {
+    // Reset della durata della registrazione
+    setRecordingDuration(0);
+    
     try {
       let stream;
       if (audioSource === 'microphone') {
@@ -343,6 +371,11 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
 
   const stopRecording = () => {
     if (recorderRef.current) {
+      // Ferma il timer
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current);
+      }
+      
       recorderRef.current.stopRecording(() => {
         const blob = recorderRef.current.getBlob();
         currentBlobRef.current = blob;
@@ -532,6 +565,24 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       <AudioWaveContainer>
         {waveElements}
       </AudioWaveContainer>
+
+      {/* Timer della registrazione */}
+      {isRecording && (
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 1 }}>
+          <Chip
+            icon={<TimerIcon />}
+            label={formatTime(recordingDuration)}
+            color="primary"
+            sx={{
+              fontSize: '1rem',
+              height: 36,
+              fontWeight: 'medium',
+              animation: isPaused ? 'none' : `${pulse} 2s infinite`,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}
+          />
+        </Box>
+      )}
 
       {/* Bottoni di controllo */}
       <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
