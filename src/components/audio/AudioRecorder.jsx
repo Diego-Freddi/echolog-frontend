@@ -22,7 +22,7 @@ import {
 import RecordRTC from 'recordrtc';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
-import { transcriptionService } from '../../services/api';
+import { transcriptionService, analysisService } from '../../services/api';
 import TranscriptionView from '../transcription/TranscriptionView';
 
 // Animazione di pulsazione per il microfono attivo
@@ -99,6 +99,9 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const [transcriptionText, setTranscriptionText] = useState('');
   const [transcriptionId, setTranscriptionId] = useState(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
+  
+  // Stato per le analisi
+  const [analysis, setAnalysis] = useState(null);
   
   const recorderRef = useRef(null);
   const streamRef = useRef(null);
@@ -335,10 +338,20 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
             setTranscriptionStatus('Trascrizione completata!');
             setIsTranscribing(false);
             setTranscriptionText(statusResponse.transcription);
+            
+            // Salva sia transcriptionId che audioFilename
             if (statusResponse.transcriptionId) {
               setTranscriptionId(statusResponse.transcriptionId);
               console.log('ID trascrizione memorizzato:', statusResponse.transcriptionId);
             }
+            
+            // Memorizziamo anche il nome del file audio
+            if (statusResponse.audioFilename) {
+              // Possiamo memorizzarlo nel localStorage o in un altro stato se necessario
+              localStorage.setItem(`audioFile_${statusResponse.transcriptionId}`, statusResponse.audioFilename);
+              console.log('Nome file audio memorizzato:', statusResponse.audioFilename);
+            }
+            
             if (onTranscribe) {
               onTranscribe(statusResponse.transcription);
             }
@@ -510,6 +523,19 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       }}
     />
   ));
+
+  // Handle text change from TranscriptionView
+  const handleTranscriptionChange = (updatedText) => {
+    setTranscriptionText(updatedText);
+  };
+  
+  // Handle analysis change from AnalysisView
+  const handleAnalysisChange = (updatedAnalysis) => {
+    setAnalysis(updatedAnalysis);
+    
+    // Opzionalmente, puoi anche salvare l'analisi aggiornata nel backend
+    // analysisService.updateAnalysis(transcriptionId, updatedAnalysis);
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
@@ -737,15 +763,15 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
         </Box>
       )}
 
-      {/* Utilizziamo il nuovo componente TranscriptionView per visualizzare trascrizione e analisi */}
-      {transcriptionText && (
-        <TranscriptionView 
-          text={transcriptionText}
-          loading={isTranscribing}
-          error={transcriptionError}
-          transcriptionId={transcriptionId}
-        />
-      )}
+      {/* Visualizzazione trascrizione e analisi */}
+      <TranscriptionView 
+        text={transcriptionText} 
+        loading={isTranscribing}
+        error={transcriptionError}
+        transcriptionId={transcriptionId}
+        onTextChange={handleTranscriptionChange}
+        onAnalysisChange={handleAnalysisChange}
+      />
     </Box>
   );
 };

@@ -9,12 +9,17 @@ import {
   Switch,
   FormControlLabel,
   Tooltip,
-  useTheme
+  useTheme,
+  TextField,
+  IconButton
 } from '@mui/material';
 import { 
   TextFields as TextFieldsIcon,
   Psychology as PsychologyIcon,
-  Highlight as HighlightIcon
+  Highlight as HighlightIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon
 } from '@mui/icons-material';
 import { analysisService } from '../../services/api';
 import AnalysisView from '../analysis/AnalysisView';
@@ -43,7 +48,7 @@ function TabPanel(props) {
 /**
  * Visualizza la trascrizione e l'analisi rispettando lo stile originale
  */
-const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
+const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange, onAnalysisChange }) => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
   const [analysis, setAnalysis] = useState(null);
@@ -51,6 +56,11 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
   const [analysisError, setAnalysisError] = useState(null);
   const [highlightKeywords, setHighlightKeywords] = useState(false);
   const [processedText, setProcessedText] = useState('');
+  
+  // Stati per la modifica della trascrizione
+  const [isEditing, setIsEditing] = useState(false);
+  const [editableText, setEditableText] = useState('');
+  const [shouldReanalyze, setShouldReanalyze] = useState(false);
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
@@ -62,24 +72,77 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
   };
 
   const performAnalysis = async () => {
-    if (!text) return;
-    
-    setAnalysisLoading(true);
-    setAnalysisError(null);
-    
     try {
-      // Usa sempre l'API reale di Gemini
-      console.log('Utilizzo API reale Gemini');
+      // Verifica che ci sia del testo
+      if (!text || text.trim() === '') {
+        setAnalysisError('Nessun testo da analizzare.');
+        return;
+      }
+
+      // Verifica che ci sia un ID trascrizione
+      if (!transcriptionId) {
+        setAnalysisError('ID trascrizione mancante, impossibile procedere con l\'analisi.');
+        return;
+      }
+
+      setAnalysisLoading(true);
+      setAnalysisError(null);
       
-      // Assicurati di inviare sia il testo che l'ID della trascrizione
-      const result = await analysisService.analyzeText(text, transcriptionId);
-      setAnalysis(result.analysis);
+      // Recupera il nome del file audio dal localStorage
+      const audioFilename = localStorage.getItem(`audioFile_${transcriptionId}`);
+      
+      // Esegui l'analisi
+      const result = await analysisService.analyze({
+        text: text,
+        transcriptionId: transcriptionId,
+        audioFilename: audioFilename // Passa il nome del file audio
+      });
+      
+      console.log('Analisi completata:', result);
+      if (result) {
+        setAnalysis(result);
+        if (onAnalysisChange) {
+          onAnalysisChange(result);
+        }
+      }
     } catch (error) {
       console.error('Errore durante l\'analisi:', error);
-      setAnalysisError(error.response?.data?.error || error.message || 'Errore durante l\'analisi');
+      setAnalysisError(error.response?.data?.error || error.message || 'Errore durante l\'analisi.');
     } finally {
       setAnalysisLoading(false);
     }
+  };
+
+  // Funzione per entrare in modalità modifica
+  const handleEditStart = () => {
+    setIsEditing(true);
+    setEditableText(text);
+  };
+
+  // Funzione per salvare le modifiche
+  const handleSave = () => {
+    if (typeof onTextChange === 'function') {
+      onTextChange(editableText);
+    }
+    
+    setIsEditing(false);
+    
+    // Se l'analisi è già stata eseguita, chiedi se rianalizzare
+    if (analysis) {
+      setShouldReanalyze(true);
+    }
+  };
+
+  // Funzione per annullare le modifiche
+  const handleCancel = () => {
+    setIsEditing(false);
+    setEditableText(text);
+  };
+
+  // Funzione per rianalizzare il testo modificato
+  const handleReanalyze = () => {
+    performAnalysis();
+    setShouldReanalyze(false);
   };
 
   // Effetto per evidenziare le parole chiave quando cambia l'analisi o l'opzione di evidenziazione
@@ -142,7 +205,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
         <Tab 
           icon={<PsychologyIcon />} 
           label="Analisi"
-          disabled={!text || loading}
+          disabled={!text || loading || isEditing}
           sx={{ 
             textTransform: 'none',
             fontWeight: 500,
@@ -169,33 +232,131 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
                 Trascrizione
               </Typography>
               
-              {analysis && (
-                <Tooltip title="Evidenzia parole chiave nel testo">
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={highlightKeywords}
-                        onChange={(e) => setHighlightKeywords(e.target.checked)}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                {!isEditing && analysis && (
+                  <Tooltip title="Evidenzia parole chiave nel testo">
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={highlightKeywords}
+                          onChange={(e) => setHighlightKeywords(e.target.checked)}
+                          color="primary"
+                          size="small"
+                        />
+                      }
+                      label={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <HighlightIcon fontSize="small" color={highlightKeywords ? 'primary' : 'action'} />
+                          <Typography variant="body2">Evidenzia</Typography>
+                        </Box>
+                      }
+                    />
+                  </Tooltip>
+                )}
+                
+                {isEditing ? (
+                  <>
+                    <Tooltip title="Salva modifiche">
+                      <IconButton 
+                        onClick={handleSave}
                         color="primary"
                         size="small"
-                      />
-                    }
-                    label={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <HighlightIcon fontSize="small" color={highlightKeywords ? 'primary' : 'action'} />
-                        <Typography variant="body2">Evidenzia</Typography>
-                      </Box>
-                    }
-                  />
-                </Tooltip>
-              )}
+                      >
+                        <SaveIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Annulla modifiche">
+                      <IconButton 
+                        onClick={handleCancel}
+                        color="default"
+                        size="small"
+                      >
+                        <CancelIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </>
+                ) : (
+                  <Tooltip title="Modifica trascrizione">
+                    <IconButton 
+                      onClick={handleEditStart}
+                      color="default"
+                      size="small"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </Box>
             </Box>
             
-            <Typography 
-              variant="body1" 
-              sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
-              dangerouslySetInnerHTML={{ __html: processedText }}
-            />
+            {isEditing ? (
+              <TextField
+                multiline
+                fullWidth
+                value={editableText}
+                onChange={(e) => setEditableText(e.target.value)}
+                variant="outlined"
+                minRows={10}
+                maxRows={20}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    bgcolor: '#ffffff',
+                    borderRadius: 2,
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.primary.main,
+                      borderWidth: 1,
+                    }
+                  }
+                }}
+              />
+            ) : (
+              <Typography 
+                variant="body1" 
+                sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
+                dangerouslySetInnerHTML={{ __html: processedText }}
+              />
+            )}
+
+            {/* Mostra banner per chiedere se rianalizzare dopo la modifica */}
+            {shouldReanalyze && (
+              <Box sx={{ 
+                mt: 3,
+                p: 2, 
+                bgcolor: 'rgba(240, 44, 86, 0.1)', 
+                borderRadius: 2,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <Typography variant="body2">
+                  Vuoi aggiornare l'analisi con il testo modificato?
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <Button 
+                    size="small" 
+                    variant="outlined"
+                    onClick={() => setShouldReanalyze(false)}
+                    sx={{ borderRadius: 2 }}
+                  >
+                    No
+                  </Button>
+                  <Button 
+                    size="small" 
+                    variant="contained"
+                    onClick={handleReanalyze}
+                    sx={{ 
+                      borderRadius: 2,
+                      bgcolor: theme.palette.primary.main 
+                    }}
+                  >
+                    Aggiorna analisi
+                  </Button>
+                </Box>
+              </Box>
+            )}
           </>
         )}
       </TabPanel>
@@ -228,6 +389,12 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
               setTabValue(0);
               setHighlightKeywords(true);
             }}
+            onAnalysisChange={(updatedAnalysis) => {
+              setAnalysis(updatedAnalysis);
+              if (typeof onAnalysisChange === 'function') {
+                onAnalysisChange(updatedAnalysis);
+              }
+            }}
           />
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3, gap: 2 }}>
@@ -248,7 +415,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId }) => {
                 }
               }}
             >
-              Analizza Testo con Gemini
+              Analizza testo
             </Button>
           </Box>
         )}

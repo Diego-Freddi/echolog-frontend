@@ -88,44 +88,146 @@ export const authService = {
 // Servizio di trascrizione
 export const transcriptionService = {
   // Invia file audio per la trascrizione
-  transcribe: async (audioBlob) => {
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'recording.mp3');
-    
-    const response = await api.post('/transcribe', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      onUploadProgress: (progressEvent) => {
-        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        console.log(`Upload in corso: ${percentCompleted}%`);
+  transcribe: async (audioBlob, recordingId = null) => {
+    try {
+      const formData = new FormData();
+      
+      if (recordingId) {
+        // Se abbiamo un recordingId, lo inviamo senza caricare nuovamente il file
+        formData.append('recordingId', recordingId);
+        console.log(`Utilizzando recordingId esistente: ${recordingId}`);
+      } else if (audioBlob) {
+        // Altrimenti carichiamo il file audio
+        formData.append('audio', audioBlob, 'recording.mp3');
+        console.log(`Caricando nuovo file audio: ${audioBlob.size} bytes`);
+      } else {
+        throw new Error('È necessario fornire un file audio o un recordingId');
       }
-    });
-    
-    return response.data;
+      
+      console.log('Invio richiesta trascrizione...');
+      const response = await api.post('/transcribe', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log(`Upload in corso: ${percentCompleted}%`);
+        }
+      });
+      
+      console.log('Risposta trascrizione:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Errore durante la trascrizione:', error);
+      if (error.response) {
+        console.error('Dettagli errore:', error.response.data);
+        throw error.response.data;
+      }
+      throw error;
+    }
   },
   
   // Controlla lo stato della trascrizione
-  checkStatus: async (operationId) => {
-    const response = await api.get(`/transcribe/status/${operationId}`);
-    return response.data;
+  checkStatus: async (operationId, recordingId = null) => {
+    try {
+      let url = `/transcribe/status/${operationId}`;
+      if (recordingId) {
+        url += `?recordingId=${recordingId}`;
+      }
+      console.log(`Controllo stato trascrizione: ${operationId}`);
+      const response = await api.get(url);
+      console.log('Stato trascrizione:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('Errore nel controllo stato trascrizione:', error);
+      if (error.response) {
+        console.error('Dettagli errore:', error.response.data);
+        throw error.response.data;
+      }
+      throw error;
+    }
   }
 };
 
 // Servizio per l'analisi del testo
 export const analysisService = {
-  // Analizza un testo con Gemini
-  analyzeText: async (text, transcriptionId) => {
+  // Analizza un testo trascritto
+  analyze: async (params) => {
     try {
-      const response = await api.post('/analyze', { 
+      const { text, transcriptionId } = params;
+      
+      if (!text || !transcriptionId) {
+        throw new Error('Testo o ID trascrizione mancanti');
+      }
+      
+      const data = {
         text,
-        transcriptionId: transcriptionId || 'temp-' + Date.now() // Fornisci un ID temporaneo se non disponibile
-      });
-      return response.data;
+        transcriptionId
+      };
+      
+      const response = await api.post('/analyze', data);
+      return response.data.analysis;
     } catch (error) {
       console.error('Errore durante l\'analisi del testo:', error);
       throw error;
     }
+  },
+  
+  // Recupera la cronologia delle analisi
+  getAnalysisHistory: async (limit = 10, skip = 0) => {
+    try {
+      const response = await api.get('/analyze', {
+        params: { limit, skip }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Errore nel recupero della cronologia delle analisi:', error);
+      throw error;
+    }
+  },
+
+  // Recupera un'analisi specifica
+  getAnalysis: async (id) => {
+    try {
+      const response = await api.get(`/analyze/${id}`);
+      return response.data.analysis;
+    } catch (error) {
+      console.error('Errore nel recupero dell\'analisi:', error);
+      throw error;
+    }
+  }
+};
+
+// Servizio per la dashboard
+export const dashboardService = {
+  // Recupera le statistiche della dashboard
+  getStats: async () => {
+    try {
+      const response = await api.get('/dashboard/stats');
+      return response.data;
+    } catch (error) {
+      console.error('Errore nel recupero delle statistiche:', error);
+      throw error;
+    }
+  },
+  
+  // Recupera la cronologia delle trascrizioni
+  getHistory: async (limit = 10, skip = 0) => {
+    try {
+      const response = await api.get('/dashboard/history', {
+        params: { limit, skip }
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Errore nel recupero della cronologia:', error);
+      throw error;
+    }
+  },
+
+  // Ottiene l'URL di download per un file audio
+  getAudioDownloadUrl: async (audioId) => {
+    // Restituisci direttamente l'URL completo dell'endpoint, dato che ora restituisce il file binario
+    return `${API_URL}/audio/${audioId}`;
   }
 };
 
@@ -136,7 +238,8 @@ setupInterceptors();
 const apiServices = {
   authService,
   transcriptionService,
-  analysisService
+  analysisService,
+  dashboardService
 };
 
 export default apiServices; 

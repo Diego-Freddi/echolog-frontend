@@ -7,6 +7,8 @@ import MainLayout from './components/layout/MainLayout';
 import Login from './pages/Login';
 import Record from './pages/Record';
 import Dashboard from './pages/Dashboard';
+import History from './pages/History';
+import Analysis from './pages/Analysis';
 
 // Importa il client ID dalle variabili d'ambiente
 if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
@@ -48,7 +50,12 @@ function App() {
             } />
             <Route path="/history" element={
               <ProtectedRoute>
-                <div>Cronologia</div>
+                <History />
+              </ProtectedRoute>
+            } />
+            <Route path="/analysis/:id" element={
+              <ProtectedRoute>
+                <Analysis />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={
