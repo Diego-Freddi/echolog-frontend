@@ -296,6 +296,17 @@ export const dashboardService = {
   getAudioDownloadUrl: async (audioId) => {
     // Restituisci direttamente l'URL completo dell'endpoint, dato che ora restituisce il file binario
     return `${API_URL}/audio/${audioId}`;
+  },
+  
+  // Recupera i dati di fatturazione e consumo API
+  getBillingData: async () => {
+    try {
+      const response = await api.get('/billing/costs');
+      return response.data;
+    } catch (error) {
+      console.error('Errore nel recupero dei dati di fatturazione:', error);
+      throw error;
+    }
   }
 };
 
