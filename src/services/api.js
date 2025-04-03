@@ -116,13 +116,55 @@ export const transcriptionService = {
       });
       
       console.log('Risposta trascrizione:', response.data);
+      
+      // Verifica che nella risposta ci sia un recordingId
+      if (!response.data.recordingId) {
+        console.warn('Nessun recordingId nella risposta');
+        throw new Error('Il server non ha restituito un recordingId valido. L\'upload potrebbe non essere stato completato.');
+      }
+      
       return response.data;
     } catch (error) {
+      // Miglioriamo la gestione degli errori per mostrare messaggi più chiari
       console.error('Errore durante la trascrizione:', error);
+      
+      let errorMessage = 'Errore durante la trascrizione del file audio';
+      
       if (error.response) {
-        console.error('Dettagli errore:', error.response.data);
-        throw error.response.data;
+        console.error('Dettagli errore dal server:', error.response.data);
+        
+        // Estrai messaggi di errore specifici dalla risposta
+        if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+          
+          // Aggiungi dettagli se disponibili
+          if (error.response.data.details) {
+            errorMessage += `: ${error.response.data.details}`;
+          }
+        }
+        
+        // Gestione di errori HTTP specifici
+        if (error.response.status === 400) {
+          errorMessage = `Richiesta non valida: ${errorMessage}`;
+        } else if (error.response.status === 401) {
+          errorMessage = 'Sessione scaduta. Effettua nuovamente il login.';
+        } else if (error.response.status === 413) {
+          errorMessage = 'Il file audio è troppo grande. La dimensione massima è 100MB.';
+        } else if (error.response.status === 415) {
+          errorMessage = 'Formato file non supportato. Utilizza formato MP3 o WAV.';
+        } else if (error.response.status === 501) {
+          errorMessage = 'Servizio di storage non configurato. Contatta l\'amministratore.';
+        } else if (error.response.status >= 500) {
+          errorMessage = `Errore del server: ${errorMessage}`;
+        }
+        
+        throw new Error(errorMessage);
+      } else if (error.request) {
+        // Errore di rete, nessuna risposta ricevuta
+        throw new Error('Impossibile comunicare con il server. Verifica la tua connessione di rete.');
       }
+      
+      // Errore generico
       throw error;
     }
   },
@@ -133,18 +175,39 @@ export const transcriptionService = {
       let url = `/transcribe/status/${operationId}`;
       if (recordingId) {
         url += `?recordingId=${recordingId}`;
+      } else {
+        console.error('recordingId non fornito nel controllo stato trascrizione');
+        throw new Error('recordingId richiesto per il controllo stato trascrizione');
       }
-      console.log(`Controllo stato trascrizione: ${operationId}`);
+      
+      console.log(`Controllo stato trascrizione: ${operationId} per recording: ${recordingId}`);
       const response = await api.get(url);
       console.log('Stato trascrizione:', response.data);
+      
+      // Verifica che la risposta contenga dati validi
+      if (response.data.status === 'failed') {
+        throw new Error(response.data.error || 'Trascrizione fallita');
+      }
+      
       return response.data;
     } catch (error) {
       console.error('Errore nel controllo stato trascrizione:', error);
-      if (error.response) {
-        console.error('Dettagli errore:', error.response.data);
-        throw error.response.data;
+      
+      let errorMessage = 'Errore nel controllo dello stato della trascrizione';
+      
+      if (error.response && error.response.data) {
+        console.error('Dettagli errore dal server:', error.response.data);
+        
+        if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+          
+          if (error.response.data.details) {
+            errorMessage += `: ${error.response.data.details}`;
+          }
+        }
       }
-      throw error;
+      
+      throw new Error(errorMessage);
     }
   }
 };

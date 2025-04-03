@@ -440,6 +440,16 @@ const History = () => {
                                 sx={{ height: 24, fontSize: '0.75rem' }}
                               />
                             </Tooltip>
+                          ) : analysis.transcriptionId && analysis.transcriptionId.startsWith('tr-') ? (
+                            <Tooltip title="Questa trascrizione usa un ID temporaneo e non è collegata a un file audio permanente">
+                              <Chip 
+                                label="ID Temporaneo" 
+                                size="small" 
+                                color="warning" 
+                                variant="outlined"
+                                sx={{ height: 24, fontSize: '0.75rem' }}
+                              />
+                            </Tooltip>
                           ) : (
                             <Chip 
                               label="Non disponibile" 
@@ -461,7 +471,7 @@ const History = () => {
                                 <VisibilityIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
-                            {analysis.audio && analysis.audio.available && (
+                            {(!analysis.transcriptionId || !analysis.transcriptionId.startsWith('tr-')) && (
                               <Tooltip title="Scarica Audio">
                                 <IconButton 
                                   size="small" 

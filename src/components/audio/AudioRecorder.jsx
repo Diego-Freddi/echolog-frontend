@@ -331,7 +331,16 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       const checkStatus = async () => {
         try {
           console.log('Controllo stato trascrizione...');
-          const statusResponse = await transcriptionService.checkStatus(response.operationId);
+          
+          // Verifica che recordingId sia disponibile
+          if (!response.recordingId) {
+            throw new Error('recordingId non disponibile per il controllo dello stato della trascrizione');
+          }
+          
+          const statusResponse = await transcriptionService.checkStatus(
+            response.operationId, 
+            response.recordingId
+          );
           console.log('Risposta stato:', statusResponse);
           
           if (statusResponse.status === 'completed') {
