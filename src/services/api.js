@@ -170,44 +170,43 @@ export const transcriptionService = {
   },
   
   // Controlla lo stato della trascrizione
-  checkStatus: async (operationId, recordingId = null) => {
+  checkStatus: async (operationId, recordingId) => {
     try {
-      let url = `/transcribe/status/${operationId}`;
-      if (recordingId) {
-        url += `?recordingId=${recordingId}`;
-      } else {
-        console.error('recordingId non fornito nel controllo stato trascrizione');
-        throw new Error('recordingId richiesto per il controllo stato trascrizione');
+      console.log(`Verifica stato trascrizione: ${operationId}, recording: ${recordingId}`);
+      
+      // Verifica che ci sia un operationId
+      if (!operationId) {
+        throw new Error('ID operazione mancante. Impossibile verificare lo stato.');
       }
       
-      console.log(`Controllo stato trascrizione: ${operationId} per recording: ${recordingId}`);
-      const response = await api.get(url);
-      console.log('Stato trascrizione:', response.data);
-      
-      // Verifica che la risposta contenga dati validi
-      if (response.data.status === 'failed') {
-        throw new Error(response.data.error || 'Trascrizione fallita');
+      // Verifica che ci sia un recordingId
+      if (!recordingId) {
+        throw new Error('Recording ID mancante. Impossibile verificare lo stato.');
       }
       
+      const response = await api.get(`/transcribe/status/${operationId}`, {
+        params: { recordingId }
+      });
       return response.data;
     } catch (error) {
-      console.error('Errore nel controllo stato trascrizione:', error);
-      
-      let errorMessage = 'Errore nel controllo dello stato della trascrizione';
-      
-      if (error.response && error.response.data) {
-        console.error('Dettagli errore dal server:', error.response.data);
-        
-        if (error.response.data.error) {
-          errorMessage = error.response.data.error;
-          
-          if (error.response.data.details) {
-            errorMessage += `: ${error.response.data.details}`;
-          }
-        }
+      console.error('Errore durante il controllo dello stato della trascrizione:', error);
+      throw error;
+    }
+  },
+  
+  // Elimina una trascrizione e tutti i dati associati
+  deleteTranscription: async (transcriptionId) => {
+    try {
+      if (!transcriptionId) {
+        throw new Error('ID trascrizione mancante. Impossibile eliminare la trascrizione.');
       }
       
-      throw new Error(errorMessage);
+      console.log(`Eliminazione trascrizione: ${transcriptionId}`);
+      const response = await api.delete(`/transcribe/${transcriptionId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Errore durante l\'eliminazione della trascrizione:', error);
+      throw error;
     }
   }
 };
@@ -217,7 +216,7 @@ export const analysisService = {
   // Analizza un testo trascritto
   analyze: async (params) => {
     try {
-      const { text, transcriptionId } = params;
+      const { text, transcriptionId, forceReanalysis, audioFilename } = params;
       
       if (!text || !transcriptionId) {
         throw new Error('Testo o ID trascrizione mancanti');
@@ -225,8 +224,14 @@ export const analysisService = {
       
       const data = {
         text,
-        transcriptionId
+        transcriptionId,
+        forceReanalysis: !!forceReanalysis
       };
+      
+      // Aggiungi il nome del file audio solo se presente
+      if (audioFilename) {
+        data.audioFilename = audioFilename;
+      }
       
       const response = await api.post('/analyze', data);
       return response.data.analysis;

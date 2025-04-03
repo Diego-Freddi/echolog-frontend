@@ -71,10 +71,13 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
     }
   };
 
-  const performAnalysis = async () => {
+  const performAnalysis = async (textOverride, forceReanalysis = false) => {
     try {
+      // Usa il testo fornito o quello della prop
+      const textToAnalyze = textOverride || text;
+      
       // Verifica che ci sia del testo
-      if (!text || text.trim() === '') {
+      if (!textToAnalyze || textToAnalyze.trim() === '') {
         setAnalysisError('Nessun testo da analizzare.');
         return;
       }
@@ -93,9 +96,10 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
       
       // Esegui l'analisi
       const result = await analysisService.analyze({
-        text: text,
+        text: textToAnalyze,
         transcriptionId: transcriptionId,
-        audioFilename: audioFilename // Passa il nome del file audio
+        audioFilename: audioFilename, // Passa il nome del file audio
+        forceReanalysis: forceReanalysis // Indica se forzare la rianalisi
       });
       
       console.log('Analisi completata:', result);
@@ -141,7 +145,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
 
   // Funzione per rianalizzare il testo modificato
   const handleReanalyze = () => {
-    performAnalysis();
+    performAnalysis(editableText, true);
     setShouldReanalyze(false);
   };
 
