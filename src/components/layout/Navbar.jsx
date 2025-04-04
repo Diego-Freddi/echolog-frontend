@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Logout as LogoutIcon, Person as PersonIcon } from '@mui/icons-material';
+import { Logout as LogoutIcon, Person as PersonIcon, Dashboard as DashboardIcon, Mic as MicIcon, Description as DescriptionIcon, History as HistoryIcon, MonetizationOn as MonetizationOnIcon } from '@mui/icons-material';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -35,6 +35,15 @@ const Navbar = () => {
     handleClose();
     navigate('/login');
   };
+
+  // Definizione delle voci di menu
+  const menuItems = [
+    { label: 'Dashboard', path: '/', icon: <DashboardIcon /> },
+    { label: 'Registrazione', path: '/record', icon: <MicIcon /> },
+    { label: 'Text Analyzer', path: '/text-analyzer', icon: <DescriptionIcon /> },
+    { label: 'Cronologia', path: '/history', icon: <HistoryIcon /> },
+    { label: 'Consumi', path: '/usage', icon: <MonetizationOnIcon /> }
+  ];
 
   return (
     <AppBar 

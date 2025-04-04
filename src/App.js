@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import History from './pages/History';
 import Analysis from './pages/Analysis';
 import Usage from './pages/Usage';
+import TextAnalyzer from './pages/TextAnalyzer';
 
 // Importa il client ID dalle variabili d'ambiente
 if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
@@ -62,6 +63,11 @@ function App() {
             <Route path="/usage" element={
               <ProtectedRoute>
                 <Usage />
+              </ProtectedRoute>
+            } />
+            <Route path="/text-analyzer" element={
+              <ProtectedRoute>
+                <TextAnalyzer />
               </ProtectedRoute>
             } />
             <Route path="/profile" element={

@@ -1,6 +1,11 @@
 import React from 'react';
 import { Box, Typography, Paper, Grid, Button } from '@mui/material';
-import { Mic as MicIcon, History as HistoryIcon, MonetizationOn as MonetizationOnIcon } from '@mui/icons-material';
+import { 
+    Mic as MicIcon, 
+    History as HistoryIcon, 
+    MonetizationOn as MonetizationOnIcon,
+    Description as DescriptionIcon 
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import PageContainer from '../components/layout/PageContainer';
@@ -95,101 +100,153 @@ const Dashboard = () => {
                 </Box>
 
                 {/* Widgets */}
-                <Grid 
-                    container 
-                    spacing={4} 
-                    justifyContent="center"
-                    sx={{ 
-                        mt: { xs: 2, sm: 4 },
+                <Box
+                    sx={{
+                        maxWidth: '1200px',
+                        mx: 'auto',
+                        width: '100%',
+                        px: 2,
                         position: 'relative',
-                        zIndex: 1
+                        zIndex: 1,
+                        mt: { xs: 2, sm: 4 },
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center'
                     }}
                 >
-                    <Grid item>
-                        <Paper sx={cardStyle} onClick={() => navigate('/record')}>
-                            <Box sx={contentStyle}>
-                                <MicIcon sx={{ fontSize: 48, color: '#f02c56', mb: 3 }} />
-                                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                                    Nuova Registrazione
-                                </Typography>
-                                <Typography color="text.secondary" align="center">
-                                    Registra e trascrivi audio con un click
-                                </Typography>
-                            </Box>
-                            <Button
-                                variant="contained"
-                                sx={{
-                                    ...buttonStyle,
-                                    background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)',
-                                    '&:hover': {
-                                        background: 'linear-gradient(90deg, #e02951 0%, #6c2be0 100%)'
-                                    }
-                                }}
-                                startIcon={<MicIcon />}
-                            >
-                                Registra Ora
-                            </Button>
-                        </Paper>
+                    {/* Prima riga */}
+                    <Grid 
+                        container 
+                        spacing={4} 
+                        sx={{ 
+                            mb: 4,
+                            justifyContent: 'center',
+                            width: '100%',
+                            maxWidth: '900px'
+                        }}
+                    >
+                        <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <Paper sx={cardStyle} onClick={() => navigate('/record')}>
+                                <Box sx={contentStyle}>
+                                    <MicIcon sx={{ fontSize: 48, color: '#f02c56', mb: 3 }} />
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                                        Nuova Registrazione
+                                    </Typography>
+                                    <Typography color="text.secondary" align="center">
+                                        Registra e trascrivi audio con un click
+                                    </Typography>
+                                </Box>
+                                <Button
+                                    variant="contained"
+                                    sx={{
+                                        ...buttonStyle,
+                                        background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)',
+                                        '&:hover': {
+                                            background: 'linear-gradient(90deg, #e02951 0%, #6c2be0 100%)'
+                                        }
+                                    }}
+                                    startIcon={<MicIcon />}
+                                >
+                                    Registra Ora
+                                </Button>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <Paper sx={cardStyle} onClick={() => navigate('/text-analyzer')}>
+                                <Box sx={contentStyle}>
+                                    <DescriptionIcon sx={{ fontSize: 48, color: '#35a0ee', mb: 3 }} />
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                                        Text Analyzer
+                                    </Typography>
+                                    <Typography color="text.secondary" align="center">
+                                        Analizza testo da file o input diretto
+                                    </Typography>
+                                </Box>
+                                <Button
+                                    variant="contained"
+                                    sx={{
+                                        ...buttonStyle,
+                                        background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)',
+                                        '&:hover': {
+                                            background: 'linear-gradient(90deg, #e02951 0%, #6c2be0 100%)'
+                                        }
+                                    }}
+                                    startIcon={<DescriptionIcon />}
+                                >
+                                    Analizza Testo
+                                </Button>
+                            </Paper>
+                        </Grid>
                     </Grid>
 
-                    <Grid item>
-                        <Paper sx={cardStyle} onClick={() => navigate('/history')}>
-                            <Box sx={contentStyle}>
-                                <HistoryIcon sx={{ fontSize: 48, color: '#7c32ff', mb: 3 }} />
-                                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                                    Cronologia
-                                </Typography>
-                                <Typography color="text.secondary" align="center">
-                                    Accedi alle tue registrazioni passate
-                                </Typography>
-                            </Box>
-                            <Button
-                                variant="outlined"
-                                sx={{
-                                    ...buttonStyle,
-                                    borderColor: '#7c32ff',
-                                    color: '#7c32ff',
-                                    '&:hover': {
-                                        borderColor: '#6c2be0',
-                                        background: 'rgba(124,50,255,0.05)'
-                                    }
-                                }}
-                                startIcon={<HistoryIcon />}
-                            >
-                                Vedi Cronologia
-                            </Button>
-                        </Paper>
+                    {/* Seconda riga */}
+                    <Grid 
+                        container 
+                        spacing={4}
+                        sx={{ 
+                            justifyContent: 'center',
+                            width: '100%',
+                            maxWidth: '900px'
+                        }}
+                    >
+                        <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <Paper sx={cardStyle} onClick={() => navigate('/history')}>
+                                <Box sx={contentStyle}>
+                                    <HistoryIcon sx={{ fontSize: 48, color: '#7c32ff', mb: 3 }} />
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                                        Cronologia
+                                    </Typography>
+                                    <Typography color="text.secondary" align="center">
+                                        Accedi alle tue registrazioni passate
+                                    </Typography>
+                                </Box>
+                                <Button
+                                    variant="outlined"
+                                    sx={{
+                                        ...buttonStyle,
+                                        borderColor: '#7c32ff',
+                                        color: '#7c32ff',
+                                        '&:hover': {
+                                            borderColor: '#6c2be0',
+                                            background: 'rgba(124,50,255,0.05)'
+                                        }
+                                    }}
+                                    startIcon={<HistoryIcon />}
+                                >
+                                    Vedi Cronologia
+                                </Button>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} sm={6} sx={{ display: 'flex', justifyContent: 'center' }}>
+                            <Paper sx={cardStyle} onClick={() => navigate('/usage')}>
+                                <Box sx={contentStyle}>
+                                    <MonetizationOnIcon sx={{ fontSize: 48, color: '#35a0ee', mb: 3 }} />
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                                        Consumi
+                                    </Typography>
+                                    <Typography color="text.secondary" align="center">
+                                        Monitora l'utilizzo dei servizi
+                                    </Typography>
+                                </Box>
+                                <Button
+                                    variant="outlined"
+                                    sx={{
+                                        ...buttonStyle,
+                                        borderColor: '#35a0ee',
+                                        color: '#35a0ee',
+                                        '&:hover': {
+                                            borderColor: '#2e8ed4',
+                                            background: 'rgba(53,160,238,0.05)'
+                                        }
+                                    }}
+                                    startIcon={<MonetizationOnIcon />}
+                                >
+                                    Vedi Consumi
+                                </Button>
+                            </Paper>
+                        </Grid>
                     </Grid>
-
-                    <Grid item>
-                        <Paper sx={cardStyle} onClick={() => navigate('/usage')}>
-                            <Box sx={contentStyle}>
-                                <MonetizationOnIcon sx={{ fontSize: 48, color: '#35a0ee', mb: 3 }} />
-                                <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
-                                    Consumi
-                                </Typography>
-                                <Typography color="text.secondary" align="center">
-                                    Monitora l'utilizzo dei servizi
-                                </Typography>
-                            </Box>
-                            <Button
-                                variant="outlined"
-                                sx={{
-                                    ...buttonStyle,
-                                    borderColor: '#35a0ee',
-                                    color: '#35a0ee',
-                                    '&:hover': {
-                                        borderColor: '#2e8ed4',
-                                        background: 'rgba(53,160,238,0.05)'
-                                    }
-                                }}
-                                startIcon={<MonetizationOnIcon />}
-                            >
-                                Vedi Consumi
-                            </Button>
-                        </Paper>
-                    </Grid>
-                </Grid>
+                </Box>
             </Box>
         </PageContainer>
     );

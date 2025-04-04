@@ -208,6 +208,107 @@ export const transcriptionService = {
       console.error('Errore durante l\'eliminazione della trascrizione:', error);
       throw error;
     }
+  },
+
+  // Crea una trascrizione da testo inserito direttamente
+  transcribeFromText: async (text, title) => {
+    try {
+      if (!text || text.trim().length === 0) {
+        throw new Error('È necessario fornire del testo da analizzare');
+      }
+
+      console.log(`Invio testo diretto per trascrizione: ${text.substring(0, 50)}...`);
+      
+      const response = await api.post('/transcribe/fromText', {
+        text,
+        title: title || `Testo diretto ${new Date().toLocaleString('it-IT')}`
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Errore durante la trascrizione da testo:', error);
+      
+      let errorMessage = 'Errore durante la trascrizione da testo';
+      
+      if (error.response) {
+        console.error('Dettagli errore dal server:', error.response.data);
+        
+        if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+          
+          if (error.response.data.details) {
+            errorMessage += `: ${error.response.data.details}`;
+          }
+        }
+      } else if (error.request) {
+        errorMessage = 'Impossibile comunicare con il server. Verifica la tua connessione di rete.';
+      }
+      
+      throw new Error(errorMessage);
+    }
+  },
+  
+  // Carica e trascrive un file di testo (PDF, DOCX, TXT)
+  transcribeFromFile: async (file) => {
+    try {
+      if (!file) {
+        throw new Error('È necessario fornire un file');
+      }
+      
+      const fileExtension = file.name.split('.').pop().toLowerCase();
+      const allowedExtensions = ['pdf', 'docx', 'doc', 'txt'];
+      
+      if (!allowedExtensions.includes(fileExtension)) {
+        throw new Error(`Formato file non supportato: ${fileExtension}. Formati supportati: PDF, DOCX, DOC, TXT`);
+      }
+
+      const formData = new FormData();
+      formData.append('document', file);
+      
+      console.log(`Caricamento file: ${file.name} (${file.size} bytes)`);
+      
+      const response = await api.post('/transcribe/fromFile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log(`Upload in corso: ${percentCompleted}%`);
+        }
+      });
+      
+      return response.data;
+    } catch (error) {
+      console.error('Errore durante la trascrizione da file:', error);
+      
+      let errorMessage = 'Errore durante la trascrizione da file';
+      
+      if (error.response) {
+        console.error('Dettagli errore dal server:', error.response.data);
+        
+        if (error.response.data.error) {
+          errorMessage = error.response.data.error;
+          
+          if (error.response.data.details) {
+            errorMessage += `: ${error.response.data.details}`;
+          }
+        }
+        
+        if (error.response.status === 400) {
+          errorMessage = `Richiesta non valida: ${errorMessage}`;
+        } else if (error.response.status === 413) {
+          errorMessage = 'Il file è troppo grande. La dimensione massima è 10MB.';
+        } else if (error.response.status === 415) {
+          errorMessage = 'Formato file non supportato. Formati supportati: PDF, DOCX, DOC, TXT.';
+        } else if (error.response.status >= 500) {
+          errorMessage = `Errore del server: ${errorMessage}`;
+        }
+      } else if (error.request) {
+        errorMessage = 'Impossibile comunicare con il server. Verifica la tua connessione di rete.';
+      }
+      
+      throw new Error(errorMessage);
+    }
   }
 };
 
