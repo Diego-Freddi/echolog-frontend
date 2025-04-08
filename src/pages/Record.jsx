@@ -8,7 +8,7 @@ import {
 import PageContainer from '../components/layout/PageContainer';
 import AudioRecorder from '../components/audio/AudioRecorder';
 
-// Paper stilizzato in stile Apple
+// Paper stilizzato
 const ApplePaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   borderRadius: 16,

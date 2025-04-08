@@ -21,7 +21,7 @@ import PageContainer from '../components/layout/PageContainer';
 import TranscriptionView from '../components/transcription/TranscriptionView';
 import { transcriptionService } from '../services/api';
 
-// Paper stilizzato in stile Apple
+// Paper stilizzato
 const ApplePaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
   borderRadius: 16,
