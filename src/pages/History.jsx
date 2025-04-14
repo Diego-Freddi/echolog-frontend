@@ -3,7 +3,7 @@ import {
   Box, Typography, Paper, Grid, CircularProgress,
   Table, TableBody, TableCell, TableContainer, TableHead, 
   TableRow, Chip, Button, Alert, Pagination, Tabs, Tab,
-  Card, CardContent, IconButton, Tooltip,
+  Card, CardContent, IconButton, Tooltip, useTheme,
   LinearProgress, Dialog, DialogActions, DialogContent, 
   DialogContentText, DialogTitle
 } from '@mui/material';
@@ -77,6 +77,7 @@ const TabPanel = (props) => {
 };
 
 const History = () => {
+  const theme = useTheme();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -400,7 +401,8 @@ const History = () => {
                             sx={{ 
                               bgcolor: `rgba(240, 44, 86, ${0.1 + (item.count / 10)})`,
                               borderRadius: '12px',
-                              '& .MuiChip-label': { px: 1.5 }
+                              '& .MuiChip-label': { px: 1.5 },
+                              color: theme.palette.primary.main
                             }}
                           />
                         ))}
@@ -529,7 +531,7 @@ const History = () => {
                           sx={{ 
                             '&:last-child td, &:last-child th': { border: 0 },
                             '&:hover': { 
-                              backgroundColor: 'rgba(124, 50, 255, 0.03)',
+                              backgroundColor: theme.palette.action.hover,
                               transition: 'all 0.2s'
                             }
                           }}

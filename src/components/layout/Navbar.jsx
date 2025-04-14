@@ -11,14 +11,27 @@ import {
   ListItemText,
   Divider,
   Container,
-  Stack
+  Stack,
+  Tooltip
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Logout as LogoutIcon, Person as PersonIcon, Dashboard as DashboardIcon, Mic as MicIcon, Description as DescriptionIcon, History as HistoryIcon, MonetizationOn as MonetizationOnIcon } from '@mui/icons-material';
+import { useThemeMode } from '../../contexts/ThemeContext';
+import { 
+  Logout as LogoutIcon, 
+  Person as PersonIcon, 
+  Dashboard as DashboardIcon, 
+  Mic as MicIcon, 
+  Description as DescriptionIcon, 
+  History as HistoryIcon, 
+  MonetizationOn as MonetizationOnIcon,
+  Brightness4 as DarkModeIcon,
+  Brightness7 as LightModeIcon
+} from '@mui/icons-material';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const { mode, toggleColorMode } = useThemeMode();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -87,6 +100,22 @@ const Navbar = () => {
               >
                 Ciao, {user.name}
               </Typography>
+
+              {/* Pulsante toggle tema */}
+              <Tooltip title={mode === 'light' ? 'Modalità scura' : 'Modalità chiara'}>
+                <IconButton
+                  onClick={toggleColorMode}
+                  sx={{
+                    color: 'white',
+                    border: '2px solid rgba(255,255,255,0.2)',
+                    '&:hover': {
+                      border: '2px solid rgba(255,255,255,0.3)'
+                    }
+                  }}
+                >
+                  {mode === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+                </IconButton>
+              </Tooltip>
 
               <IconButton
                 size="large"

@@ -177,7 +177,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
       sx={{ 
         width: '100%', 
         mt: 3, 
-        backgroundColor: '#f5f5f7',
+        backgroundColor: theme.palette.background.paper,
         borderRadius: 2,
         border: '1px solid rgba(0,0,0,0.1)',
         boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
@@ -188,8 +188,8 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
         value={tabValue} 
         onChange={handleTabChange}
         sx={{
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid rgba(0,0,0,0.1)',
+          backgroundColor: theme.palette.background.paper,
+          borderBottom: `1px solid ${theme.palette.divider}`,
           '& .MuiTabs-indicator': {
             backgroundColor: theme.palette.primary.main,
           }
@@ -201,6 +201,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
           sx={{ 
             textTransform: 'none',
             fontWeight: 500,
+            color: theme.palette.text.primary,
             '&.Mui-selected': {
               color: theme.palette.primary.main,
             }
@@ -213,6 +214,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
           sx={{ 
             textTransform: 'none',
             fontWeight: 500,
+            color: theme.palette.text.primary,
             '&.Mui-selected': {
               color: theme.palette.primary.main,
             }
@@ -304,7 +306,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                 maxRows={20}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    bgcolor: '#ffffff',
+                    bgcolor: theme.palette.background.paper,
                     borderRadius: 2,
                     '&:hover .MuiOutlinedInput-notchedOutline': {
                       borderColor: theme.palette.primary.main,
@@ -392,6 +394,10 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
             onKeywordClick={(keyword) => {
               setTabValue(0);
               setHighlightKeywords(true);
+              // Evidenzia la parola chiave nel testo usando i colori del tema
+              const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
+              const highlightedText = text.replace(regex, `<mark style="background-color: ${theme.palette.mode === 'dark' ? 'rgba(240, 44, 86, 0.3)' : 'rgba(240, 44, 86, 0.15)'}; color: ${theme.palette.text.primary}; padding: 0 4px; border-radius: 2px;">$1</mark>`);
+              setProcessedText(highlightedText);
             }}
             onAnalysisChange={(updatedAnalysis) => {
               setAnalysis(updatedAnalysis);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Box, 
   Typography, 
@@ -39,28 +39,42 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedAnalysis, setEditedAnalysis] = useState(null);
   
+  // Calcola i pesi delle parole chiave in base alla loro frequenza nel testo
+  const cloudData = useMemo(() => {
+    if (!analysis?.keywords || !analysis?.summary) return [];
+    
+    const { summary, sections, keywords } = analysis;
+    
+    // Combina il testo del sommario e delle sezioni
+    const fullText = [
+      summary,
+      ...(sections?.map(section => section.content) || [])
+    ].join(' ').toLowerCase();
+    
+    return keywords.map(keyword => {
+      // Conta le occorrenze della parola chiave nel testo
+      const regex = new RegExp(`\\b${keyword.toLowerCase()}\\b`, 'g');
+      const count = (fullText.match(regex) || []).length;
+      
+      // Normalizza il conteggio per avere valori tra 10 e 50
+      const normalizedCount = Math.max(10, Math.min(50, count * 5 + 10));
+      
+      return {
+        value: keyword,
+        count: normalizedCount
+      };
+    });
+  }, [analysis]);
+  
+  // Configurazione TagCloud con colori del tema
+  const cloudOptions = {
+    luminosity: theme.palette.mode === 'dark' ? 'light' : 'dark',
+    hue: theme.palette.primary.main
+  };
+  
   if (!analysis) return null;
   
   const { summary, tone, keywords, sections } = analysis;
-  
-  // Preparazione dati per TagCloud
-  const cloudData = keywords?.map(keyword => ({
-    value: keyword,
-    count: Math.floor(Math.random() * 30) + 10, // Peso randomico per visual appeal
-  })) || [];
-  
-  // Configurazione TagCloud
-  const cloudOptions = {
-    luminosity: 'light',
-    hue: '#f02c56', // Colore primario dell'app
-  };
-  
-  // Gestisci il click su una parola chiave
-  const handleKeywordClick = (keyword) => {
-    if (onKeywordClick) {
-      onKeywordClick(keyword);
-    }
-  };
   
   // Entra in modalità modifica
   const handleEditStart = () => {
@@ -288,8 +302,14 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                 maxRows={10}
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    bgcolor: '#ffffff',
-                    borderRadius: 2
+                    bgcolor: theme.palette.background.paper,
+                    borderRadius: 2,
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    }
                   }
                 }}
               />
@@ -311,8 +331,14 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                 variant="outlined"
                 sx={{
                   '& .MuiOutlinedInput-root': {
-                    bgcolor: '#ffffff',
-                    borderRadius: 2
+                    bgcolor: theme.palette.background.paper,
+                    borderRadius: 2,
+                    '&:hover fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: theme.palette.primary.main,
+                    }
                   }
                 }}
               />
@@ -332,6 +358,13 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                     size="small" 
                     color="primary"
                     onClick={handleAddKeyword}
+                    sx={{
+                      '&:hover': {
+                        bgcolor: theme.palette.mode === 'dark' 
+                          ? 'rgba(240,44,86,0.2)' 
+                          : 'rgba(240,44,86,0.1)',
+                      }
+                    }}
                   >
                     <AddIcon />
                   </IconButton>
@@ -350,8 +383,14 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                       size="small"
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          bgcolor: '#ffffff',
-                          borderRadius: 2
+                          bgcolor: theme.palette.background.paper,
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          }
                         }
                       }}
                     />
@@ -360,6 +399,13 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                         size="small" 
                         color="error"
                         onClick={() => handleRemoveKeyword(index)}
+                        sx={{
+                          '&:hover': {
+                            bgcolor: theme.palette.mode === 'dark' 
+                              ? 'rgba(211,47,47,0.2)' 
+                              : 'rgba(211,47,47,0.1)',
+                          }
+                        }}
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
@@ -380,6 +426,13 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                     size="small" 
                     color="primary"
                     onClick={handleAddSection}
+                    sx={{
+                      '&:hover': {
+                        bgcolor: theme.palette.mode === 'dark' 
+                          ? 'rgba(240,44,86,0.2)' 
+                          : 'rgba(240,44,86,0.1)',
+                      }
+                    }}
                   >
                     <AddIcon />
                   </IconButton>
@@ -392,8 +445,9 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                   sx={{ 
                     mb: 3,
                     p: 2,
-                    border: '1px solid rgba(0,0,0,0.08)',
-                    borderRadius: 2
+                    border: `1px solid ${theme.palette.divider}`,
+                    borderRadius: 2,
+                    backgroundColor: theme.palette.background.paper
                   }}
                 >
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
@@ -406,8 +460,14 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                       size="small"
                       sx={{
                         '& .MuiOutlinedInput-root': {
-                          bgcolor: '#ffffff',
-                          borderRadius: 2
+                          bgcolor: theme.palette.background.paper,
+                          borderRadius: 2,
+                          '&:hover fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: theme.palette.primary.main,
+                          }
                         }
                       }}
                     />
@@ -416,6 +476,13 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                         size="small" 
                         color="error"
                         onClick={() => handleRemoveSection(sectionIndex)}
+                        sx={{
+                          '&:hover': {
+                            bgcolor: theme.palette.mode === 'dark' 
+                              ? 'rgba(211,47,47,0.2)' 
+                              : 'rgba(211,47,47,0.1)',
+                          }
+                        }}
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -434,20 +501,34 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                     sx={{
                       mb: 2,
                       '& .MuiOutlinedInput-root': {
-                        bgcolor: '#ffffff',
-                        borderRadius: 2
+                        bgcolor: theme.palette.background.paper,
+                        borderRadius: 2,
+                        '&:hover fieldset': {
+                          borderColor: theme.palette.primary.main,
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: theme.palette.primary.main,
+                        }
                       }
                     }}
                   />
                   
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, color: theme.palette.text.primary }}>
                       Parole chiave della sezione
                     </Typography>
                     <Tooltip title="Aggiungi parola chiave">
                       <IconButton 
                         size="small" 
                         onClick={() => handleAddSectionKeyword(sectionIndex)}
+                        sx={{
+                          color: theme.palette.primary.main,
+                          '&:hover': {
+                            bgcolor: theme.palette.mode === 'dark' 
+                              ? 'rgba(240,44,86,0.2)' 
+                              : 'rgba(240,44,86,0.1)',
+                          }
+                        }}
                       >
                         <AddIcon fontSize="small" />
                       </IconButton>
@@ -466,8 +547,14 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                           size="small"
                           sx={{
                             '& .MuiOutlinedInput-root': {
-                              bgcolor: '#ffffff',
-                              borderRadius: 2
+                              bgcolor: theme.palette.background.paper,
+                              borderRadius: 2,
+                              '&:hover fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              },
+                              '&.Mui-focused fieldset': {
+                                borderColor: theme.palette.primary.main,
+                              }
                             }
                           }}
                         />
@@ -476,6 +563,13 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                             size="small" 
                             color="error"
                             onClick={() => handleRemoveSectionKeyword(sectionIndex, keywordIndex)}
+                            sx={{
+                              '&:hover': {
+                                bgcolor: theme.palette.mode === 'dark' 
+                                  ? 'rgba(211,47,47,0.2)' 
+                                  : 'rgba(211,47,47,0.1)',
+                              }
+                            }}
                           >
                             <DeleteIcon fontSize="small" />
                           </IconButton>
@@ -515,7 +609,9 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                 <Chip 
                   label={tone} 
                   sx={{ 
-                    backgroundColor: 'rgba(240,44,86,0.1)',
+                    backgroundColor: theme.palette.mode === 'dark' 
+                      ? 'rgba(240,44,86,0.2)' 
+                      : 'rgba(240,44,86,0.1)',
                     color: theme.palette.primary.main,
                     fontWeight: 500,
                     borderRadius: 4
@@ -539,7 +635,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                   display: 'flex', 
                   justifyContent: 'center', 
                   p: 2, 
-                  backgroundColor: '#f9f9f9',
+                  backgroundColor: theme.palette.background.paper,
                   borderRadius: 2,
                   mb: 2
                 }}>
@@ -547,7 +643,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                     minSize={14}
                     maxSize={35}
                     tags={cloudData}
-                    colorOptions={cloudOptions}
+                    onClick={(tag) => onKeywordClick && onKeywordClick(tag.value)}
                     renderer={(tag, size, color) => (
                       <span
                         key={tag.value}
@@ -558,36 +654,21 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                           margin: '5px',
                           padding: '5px',
                           display: 'inline-block',
-                          color: theme.palette.primary.main,
+                          color: theme.palette.text.primary,
                           fontWeight: 'bold',
-                          opacity: size / 35 + 0.5, // Opacità basata sulla dimensione
+                          opacity: size / 35 + 0.5,
                           cursor: onKeywordClick ? 'pointer' : 'default',
+                          transition: 'all 0.3s ease',
+                          '&:hover': {
+                            color: theme.palette.primary.main,
+                            transform: 'scale(1.1)'
+                          }
                         }}
-                        onClick={() => handleKeywordClick(tag.value)}
                       >
                         {tag.value}
                       </span>
                     )}
                   />
-                </Box>
-                
-                {/* Visualizzazione tradizionale (per il PDF e fallback) */}
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                  {keywords.map((keyword, index) => (
-                    <Chip 
-                      key={index}
-                      label={keyword}
-                      onClick={() => handleKeywordClick(keyword)}
-                      sx={{ 
-                        backgroundColor: '#f5f5f7',
-                        borderRadius: 4,
-                        cursor: onKeywordClick ? 'pointer' : 'default',
-                        '&:hover': onKeywordClick ? {
-                          backgroundColor: 'rgba(240,44,86,0.1)',
-                        } : {}
-                      }}
-                    />
-                  ))}
                 </Box>
               </Box>
             )}
@@ -606,14 +687,15 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                       borderRadius: '8px!important',
                       '&:before': { display: 'none' },
                       boxShadow: 'none',
-                      border: '1px solid rgba(0,0,0,0.08)'
+                      border: `1px solid ${theme.palette.divider}`,
+                      backgroundColor: theme.palette.background.paper
                     }}
                   >
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       sx={{ 
                         borderRadius: 2,
-                        backgroundColor: 'rgba(0,0,0,0.02)'
+                        backgroundColor: theme.palette.action.hover
                       }}
                     >
                       <Typography sx={{ fontWeight: 500 }}>{section.title}</Typography>
@@ -627,14 +709,19 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                               key={keywordIndex}
                               label={keyword}
                               size="small"
-                              onClick={() => handleKeywordClick(keyword)}
+                              onClick={() => onKeywordClick(keyword)}
                               sx={{ 
-                                backgroundColor: 'rgba(240,44,86,0.05)',
+                                backgroundColor: theme.palette.mode === 'dark' 
+                                  ? 'rgba(240,44,86,0.2)' 
+                                  : 'rgba(240,44,86,0.1)',
+                                color: theme.palette.primary.main,
+                                fontWeight: 500,
                                 borderRadius: 4,
-                                fontSize: '0.75rem',
                                 cursor: onKeywordClick ? 'pointer' : 'default',
                                 '&:hover': onKeywordClick ? {
-                                  backgroundColor: 'rgba(240,44,86,0.15)',
+                                  backgroundColor: theme.palette.mode === 'dark' 
+                                    ? 'rgba(240,44,86,0.3)' 
+                                    : 'rgba(240,44,86,0.2)',
                                 } : {}
                               }}
                             />

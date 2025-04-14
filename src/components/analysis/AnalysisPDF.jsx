@@ -113,7 +113,7 @@ const AnalysisPDF = ({ analysis }) => {
         )}
         
         {/* Parole chiave */}
-        {analysis.keywords && analysis.keywords.length > 0 && (
+        {/* {analysis.keywords && analysis.keywords.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.title}>Parole chiave</Text>
             <View style={styles.keywordsContainer}>
@@ -122,7 +122,7 @@ const AnalysisPDF = ({ analysis }) => {
               ))}
             </View>
           </View>
-        )}
+        )} */}
         
         {/* Sezioni tematiche */}
         {analysis.sections && analysis.sections.length > 0 && (

@@ -129,7 +129,7 @@ const Dashboard = () => {
                             <Paper sx={cardStyle} onClick={() => navigate('/record')}>
                                 <Box sx={contentStyle}>
                                     <MicIcon sx={{ fontSize: 48, color: '#f02c56', mb: 3 }} />
-                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                                         Nuova Registrazione
                                     </Typography>
                                     <Typography color="text.secondary" align="center">
@@ -155,7 +155,7 @@ const Dashboard = () => {
                             <Paper sx={cardStyle} onClick={() => navigate('/text-analyzer')}>
                                 <Box sx={contentStyle}>
                                     <DescriptionIcon sx={{ fontSize: 48, color: '#35a0ee', mb: 3 }} />
-                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                                         Text Analyzer
                                     </Typography>
                                     <Typography color="text.secondary" align="center">
@@ -193,7 +193,7 @@ const Dashboard = () => {
                             <Paper sx={cardStyle} onClick={() => navigate('/history')}>
                                 <Box sx={contentStyle}>
                                     <HistoryIcon sx={{ fontSize: 48, color: '#7c32ff', mb: 3 }} />
-                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                                         Cronologia
                                     </Typography>
                                     <Typography color="text.secondary" align="center">
@@ -221,7 +221,7 @@ const Dashboard = () => {
                             <Paper sx={cardStyle} onClick={() => navigate('/usage')}>
                                 <Box sx={contentStyle}>
                                     <MonetizationOnIcon sx={{ fontSize: 48, color: '#35a0ee', mb: 3 }} />
-                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600, color: '#1a1a1a' }}>
+                                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                                         Consumi
                                     </Typography>
                                     <Typography color="text.secondary" align="center">

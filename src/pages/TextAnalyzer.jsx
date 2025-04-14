@@ -47,12 +47,12 @@ const DropZone = styled(Box)(({ theme, isDragActive, hasFile }) => ({
   borderRadius: theme.shape.borderRadius * 2,
   padding: theme.spacing(4),
   textAlign: 'center',
-  backgroundColor: isDragActive ? 'rgba(240, 44, 86, 0.08)' : hasFile ? 'rgba(76, 175, 80, 0.08)' : '#fafafa',
+  backgroundColor: isDragActive ? 'rgba(240, 44, 86, 0.08)' : hasFile ? 'rgba(76, 175, 80, 0.08)' : theme.palette.background.paper,
   cursor: 'pointer',
   transition: 'all 0.3s ease',
   marginBottom: theme.spacing(3),
   '&:hover': {
-    backgroundColor: isDragActive ? 'rgba(240, 44, 86, 0.12)' : hasFile ? 'rgba(76, 175, 80, 0.12)' : '#f5f5f5',
+    backgroundColor: isDragActive ? 'rgba(240, 44, 86, 0.12)' : hasFile ? 'rgba(76, 175, 80, 0.12)' : theme.palette.background.hover,
     borderColor: isDragActive ? theme.palette.primary.main : hasFile ? theme.palette.success.main : theme.palette.primary.light
   }
 }));
@@ -265,7 +265,7 @@ const TextAnalyzer = () => {
             <>
               <Box sx={{ 
                 display: 'flex', 
-                backgroundColor: '#f5f5f7',
+                backgroundColor: theme.palette.background.default,
                 borderRadius: 4,
                 padding: 1,
                 justifyContent: 'center',
@@ -279,17 +279,17 @@ const TextAnalyzer = () => {
                   startIcon={<UploadIcon />}
                   sx={{ 
                     borderRadius: 2,
-                    backgroundColor: tabValue === 0 ? '#ffffff' : 'transparent',
-                    color: tabValue === 0 ? '#000000' : '#666666',
-                    boxShadow: tabValue === 0 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                    backgroundColor: tabValue === 0 ? theme.palette.background.paper : 'transparent',
+                    color: tabValue === 0 ? theme.palette.text.primary : theme.palette.text.secondary,
+                    boxShadow: tabValue === 0 ? theme.shadows[1] : 'none',
                     transition: 'all 0.2s ease-in-out',
                     px: 3,
                     py: 1,
                     textTransform: 'uppercase',
                     fontWeight: 500,
                     '&:hover': {
-                      backgroundColor: tabValue === 0 ? '#ffffff' : 'rgba(0,0,0,0.04)',
-                      boxShadow: tabValue === 0 ? '0 4px 8px rgba(0,0,0,0.05)' : 'none',
+                      backgroundColor: tabValue === 0 ? theme.palette.background.paper : theme.palette.action.hover,
+                      boxShadow: tabValue === 0 ? theme.shadows[2] : 'none',
                       transform: 'translateY(-1px)'
                     }
                   }}
@@ -302,17 +302,17 @@ const TextAnalyzer = () => {
                   startIcon={<TextFieldsIcon />}
                   sx={{ 
                     borderRadius: 2,
-                    backgroundColor: tabValue === 1 ? '#ffffff' : 'transparent',
-                    color: tabValue === 1 ? '#000000' : '#666666',
-                    boxShadow: tabValue === 1 ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
+                    backgroundColor: tabValue === 1 ? theme.palette.background.paper : 'transparent',
+                    color: tabValue === 1 ? theme.palette.text.primary : theme.palette.text.secondary,
+                    boxShadow: tabValue === 1 ? theme.shadows[1] : 'none',
                     transition: 'all 0.2s ease-in-out',
                     px: 3,
                     py: 1,
                     textTransform: 'uppercase',
                     fontWeight: 500,
                     '&:hover': {
-                      backgroundColor: tabValue === 1 ? '#ffffff' : 'rgba(0,0,0,0.04)',
-                      boxShadow: tabValue === 1 ? '0 4px 8px rgba(0,0,0,0.05)' : 'none',
+                      backgroundColor: tabValue === 1 ? theme.palette.background.paper : theme.palette.action.hover,
+                      boxShadow: tabValue === 1 ? theme.shadows[2] : 'none',
                       transform: 'translateY(-1px)'
                     }
                   }}
@@ -336,8 +336,7 @@ const TextAnalyzer = () => {
                 <Box sx={{ width: '100%' }}>
                   <Box sx={{ mb: 3 }}>
                     <Typography variant="h6" gutterBottom sx={{ 
-                      fontWeight: 600,
-                      color: '#1a1a1a'
+                      fontWeight: 600
                     }}>
                       Carica un file da analizzare
                     </Typography>
@@ -440,8 +439,7 @@ const TextAnalyzer = () => {
                 <Box sx={{ width: '100%' }}>
                   <Box sx={{ mb: 3 }}>
                     <Typography variant="h6" gutterBottom sx={{ 
-                      fontWeight: 600,
-                      color: '#1a1a1a'
+                      fontWeight: 600
                     }}>
                       Inserisci il testo da analizzare
                     </Typography>
