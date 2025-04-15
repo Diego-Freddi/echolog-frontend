@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Box, Typography, CircularProgress, Paper, 
   Divider, Chip, LinearProgress, Grid,
-  Card, CardContent, Stack
+  Card, CardContent, Stack, Button
 } from '@mui/material';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, 
@@ -95,14 +95,28 @@ const CreditCard = ({ remainingCredits, remainingDays, totalCostAllTime }) => {
 
   return (
     <Card variant="outlined" sx={styles.card}>
-      <CardContent>
+      <CardContent sx={{ p: { xs: 3, sm: 2 } }}>
         <Stack spacing={2}>
-          <Typography variant="subtitle1" gutterBottom sx={styles.cardHeader}>
+          <Typography 
+            variant="subtitle1" 
+            gutterBottom 
+            sx={{ 
+              ...styles.cardHeader,
+              fontSize: { xs: '1.1rem', sm: 'inherit' },
+              mb: { xs: 1, sm: 0.5 }
+            }}
+          >
             Crediti Google Cloud
           </Typography>
           
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="h3" sx={{ fontWeight: 700 }}>
+          <Stack spacing={1}>
+            <Typography 
+              variant="h3" 
+              sx={{ 
+                fontWeight: 700,
+                fontSize: { xs: '2.2rem', sm: '2rem' }
+              }}
+            >
               {formatCurrency(remainingCredits)}
             </Typography>
             {remainingDays && (
@@ -114,7 +128,8 @@ const CreditCard = ({ remainingCredits, remainingDays, totalCostAllTime }) => {
                   bgcolor: 'rgba(124, 50, 255, 0.1)',
                   color: '#7c32ff',
                   border: 'none',
-                  ml: 1
+                  fontSize: { xs: '0.8rem', sm: '0.75rem' },
+                  alignSelf: 'flex-start'
                 }}
               />
             )}
@@ -125,7 +140,7 @@ const CreditCard = ({ remainingCredits, remainingDays, totalCostAllTime }) => {
               variant="determinate" 
               value={Math.min(100, usagePercentage)}
               sx={{ 
-                height: 10, 
+                height: { xs: 12, sm: 10 },
                 borderRadius: 5,
                 mb: 1,
                 bgcolor: 'rgba(240, 44, 86, 0.1)',
@@ -134,7 +149,11 @@ const CreditCard = ({ remainingCredits, remainingDays, totalCostAllTime }) => {
                 }
               }} 
             />
-            <Typography variant="caption" color="text.secondary">
+            <Typography 
+              variant="caption" 
+              color="text.secondary"
+              sx={{ fontSize: { xs: '0.85rem', sm: 'inherit' } }}
+            >
               {!isNaN(usagePercentage) 
                 ? `${usagePercentage.toFixed(1)}% utilizzato` 
                 : 'Impossibile calcolare la percentuale'}
@@ -288,34 +307,64 @@ const ServiceDetailCard = ({ services }) => (
     display: 'flex',
     flexDirection: 'column'
   }}>
-    <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="subtitle1" gutterBottom sx={styles.cardHeader}>
+    <CardContent sx={{ 
+      flex: 1, 
+      display: 'flex', 
+      flexDirection: 'column',
+      p: { xs: 2.5, sm: 2 }
+    }}>
+      <Typography 
+        variant="subtitle1" 
+        gutterBottom 
+        sx={{ 
+          ...styles.cardHeader,
+          fontSize: { xs: '1.1rem', sm: 'inherit' },
+          mb: { xs: 2, sm: 1.5 }
+        }}
+      >
         Dettaglio Servizi
       </Typography>
       
       {services && services.length > 0 ? (
-        <Stack spacing={1.5} sx={{ flex: 1, overflow: 'auto', maxHeight: 350 }}>
+        <Stack spacing={{ xs: 2, sm: 1.5 }} sx={{ flex: 1, overflow: 'auto', maxHeight: { xs: 'none', sm: 350 } }}>
           {services.map((service, index) => (
             <Box 
               key={index}
-              sx={styles.itemBox}
+              sx={{
+                ...styles.itemBox,
+                p: { xs: 2, sm: 1.5 },
+                borderRadius: { xs: 3, sm: 2 }
+              }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', maxWidth: '70%' }}>
                 <Box
                   sx={{
-                    width: 12,
-                    height: 12,
+                    width: { xs: 14, sm: 12 },
+                    height: { xs: 14, sm: 12 },
                     bgcolor: COLORS[index % COLORS.length],
                     borderRadius: '50%',
                     mr: 1.5,
                     flexShrink: 0
                   }}
                 />
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    fontWeight: 500,
+                    fontSize: { xs: '0.9rem', sm: 'inherit' }
+                  }}
+                >
                   {service.service}
                 </Typography>
               </Box>
-              <Typography variant="body2" sx={{ fontWeight: 600, ml: 1 }}>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  fontWeight: 600, 
+                  ml: 1,
+                  fontSize: { xs: '0.9rem', sm: 'inherit' }
+                }}
+              >
                 {formatCurrency(service.cost)}
               </Typography>
             </Box>
@@ -338,23 +387,6 @@ const ServiceDetailCard = ({ services }) => (
     </CardContent>
   </Card>
 );
-
-// Componente per le info del progetto
-// const ProjectInfo = ({ projectId, billingAccountId }) => (
-//   <Box sx={{ 
-//     display: 'flex', 
-//     justifyContent: 'space-between',
-//     mt: 1,
-//     px: 1
-//   }}>
-//     <Typography variant="caption" color="text.secondary">
-//       Progetto: {projectId || 'Non disponibile'}
-//     </Typography>
-//     <Typography variant="caption" color="text.secondary">
-//       Account di fatturazione: {billingAccountId || 'Non disponibile'}
-//     </Typography>
-//   </Box>
-// );
 
 // Componente principale
 const UsageWidget = () => {
@@ -403,7 +435,13 @@ const UsageWidget = () => {
         gutterBottom 
         sx={{ 
           fontWeight: 600,
-          mb: 2 
+          mb: 2,
+          fontSize: { xs: '1.25rem', sm: '1.25rem' },
+          textAlign: { xs: 'center', sm: 'left' },
+          background: { xs: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)', sm: 'none' },
+          WebkitBackgroundClip: { xs: 'text', sm: 'none' },
+          WebkitTextFillColor: { xs: 'transparent', sm: 'inherit' },
+          p: { xs: 1, sm: 0 }
         }}
       >
         Monitoraggio Consumi API
@@ -412,7 +450,7 @@ const UsageWidget = () => {
       <Divider sx={{ mb: 3 }} />
       
       <Grid container spacing={3}>
-        {/* Prima riga: Crediti rimanenti e Riepilogo costi */}
+        {/* Prima riga: Crediti rimanenti */}
         <Grid item xs={12} md={6}>
           <CreditCard 
             remainingCredits={billingData?.remainingCredits}
@@ -421,7 +459,8 @@ const UsageWidget = () => {
           />
         </Grid>
         
-        <Grid item xs={12} md={6}>
+        {/* Seconda riga: Riepilogo costi - visibile solo su desktop */}
+        <Grid item xs={12} md={6} sx={{ display: { xs: 'none', md: 'block' } }}>
           <CostSummaryCard 
             totalCost={billingData?.totalCost}
             totalCredits={billingData?.totalCredits}
@@ -430,22 +469,15 @@ const UsageWidget = () => {
           />
         </Grid>
         
-        {/* Seconda riga: Grafico a torta e Dettaglio Servizi affiancati */}
-        <Grid item xs={12} md={7}>
+        {/* Terza riga: Grafico a torta - visibile solo su desktop */}
+        <Grid item xs={12} md={7} sx={{ display: { xs: 'none', md: 'block' } }}>
           <ServiceChart serviceData={pieData} />
         </Grid>
         
+        {/* Quarta riga: Dettaglio Servizi */}
         <Grid item xs={12} md={5}>
           <ServiceDetailCard services={billingData?.serviceBreakdown} />
         </Grid>
-        
-        {/* Informazioni progetto */}
-        {/* <Grid item xs={12}>
-          <ProjectInfo 
-            projectId={billingData?.projectId}
-            billingAccountId={billingData?.billingAccountId}
-          />
-        </Grid> */}
       </Grid>
     </Paper>
   );

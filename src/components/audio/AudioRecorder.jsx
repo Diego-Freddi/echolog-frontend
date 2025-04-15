@@ -46,10 +46,10 @@ const AudioWaveContainer = styled(Box)({
   display: 'flex',
   alignItems: 'flex-end',
   justifyContent: 'center',
-  height: 50,
+  height: { xs: 60, sm: 80 },
   width: '100%',
-  margin: '16px 0',
-  gap: 3,
+  position: 'relative',
+  gap: { xs: 2, sm: 3 }
 });
 
 // Visualizzatore onde audio
@@ -57,10 +57,13 @@ const AudioWave = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isActive' && prop !== 'index'
 })(({ isActive, index }) => ({
   width: 4,
-  height: 5,
   margin: '0 1px',
   borderRadius: 4,
   backgroundColor: '#f02c56',
+  position: 'absolute',
+  bottom: 0,
+  transform: 'translateY(0)',
+  transformOrigin: 'bottom',
   transition: isActive ? 'height 0.1s ease-in-out' : 'height 0.5s ease-out',
 }));
 
@@ -520,17 +523,28 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
 
   // Genera le barre delle onde audio
   const waveElements = audioLevels.map((level, i) => (
-    <AudioWave 
-      key={i} 
-      index={i} 
-      isActive={isRecording}
+    <Box 
+      key={i}
       sx={{ 
-        height: `${isRecording ? level : 3}px`,
-        opacity: isRecording ? (level > 5 ? 1 : 0.7) : 0.3,
-        backgroundColor: isRecording && level > 15 ? theme.palette.primary.main : '#c5c5c7',
-        transition: 'height 0.1s ease-in-out, opacity 0.2s ease, background-color 0.3s ease'
+        position: 'relative',
+        width: 8,
+        height: '100%',
+        display: 'flex',
+        alignItems: 'flex-end'
       }}
-    />
+    >
+      <AudioWave 
+        index={i} 
+        isActive={isRecording}
+        sx={{ 
+          height: `${isRecording ? level : 3}px`,
+          minHeight: '3px',
+          opacity: isRecording ? (level > 5 ? 1 : 0.7) : 0.3,
+          backgroundColor: isRecording && level > 15 ? theme.palette.primary.main : '#c5c5c7',
+          transition: 'height 0.1s ease-in-out, opacity 0.2s ease, background-color 0.3s ease'
+        }}
+      />
+    </Box>
   ));
 
   // Handle text change from TranscriptionView
@@ -547,25 +561,38 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      alignItems: 'center', 
+      gap: { xs: 1.5, sm: 2, md: 3 },
+      width: '100%'
+    }}>
       {/* Toggle Button Group per la selezione della sorgente */}
       <Box sx={{ 
         display: 'flex', 
-        gap: 2, 
+        gap: { xs: 1, sm: 2 }, 
         backgroundColor: '#f5f5f7',
         borderRadius: 4,
-        padding: 1
+        padding: { xs: 0.5, sm: 1 },
+        width: '65%',
+        justifyContent: 'center',
+        flexWrap: { xs: 'wrap', sm: 'nowrap' }
       }}>
         <Button
           variant={audioSource === 'microphone' ? 'contained' : 'text'}
           onClick={() => handleAudioSourceChange(null, 'microphone')}
-          startIcon={<MicIcon />}
+          startIcon={<MicIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.3rem' } }} />}
           sx={{ 
             borderRadius: 2,
             backgroundColor: audioSource === 'microphone' ? '#ffffff' : 'transparent',
             color: audioSource === 'microphone' ? '#000000' : '#666666',
             boxShadow: audioSource === 'microphone' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
             transition: 'all 0.2s ease-in-out',
+            fontSize: { xs: '0.875rem', sm: '1rem' },
+            py: { xs: 0.5, sm: 1 },
+            px: { xs: 1.5, sm: 2 },
+            minWidth: { xs: '45%', sm: 'auto' },
             '&:hover': {
               backgroundColor: audioSource === 'microphone' ? '#ffffff' : 'rgba(0,0,0,0.04)',
               boxShadow: audioSource === 'microphone' ? '0 4px 8px rgba(0,0,0,0.05)' : 'none',
@@ -578,13 +605,17 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
         <Button
           variant={audioSource === 'system' ? 'contained' : 'text'}
           onClick={() => handleAudioSourceChange(null, 'system')}
-          startIcon={<ComputerIcon />}
+          startIcon={<ComputerIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />}
           sx={{ 
             borderRadius: 2,
             backgroundColor: audioSource === 'system' ? '#ffffff' : 'transparent',
             color: audioSource === 'system' ? '#000000' : '#666666',
             boxShadow: audioSource === 'system' ? '0 2px 4px rgba(0,0,0,0.1)' : 'none',
             transition: 'all 0.2s ease-in-out',
+            fontSize: { xs: '0.875rem', sm: '1rem' },
+            py: { xs: 0.5, sm: 1 },
+            px: { xs: 1.5, sm: 2 },
+            minWidth: { xs: '45%', sm: 'auto' },
             '&:hover': {
               backgroundColor: audioSource === 'system' ? '#ffffff' : 'rgba(0,0,0,0.04)',
               boxShadow: audioSource === 'system' ? '0 4px 8px rgba(0,0,0,0.05)' : 'none',
@@ -597,20 +628,28 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       </Box>
 
       {/* Visualizzatore onde audio */}
-      <AudioWaveContainer>
-        {waveElements}
-      </AudioWaveContainer>
+      <Box sx={{ 
+        my: { xs: 4, sm: 5 }, 
+        width: '100%', 
+        // height: { xs: 10, sm: 20 },
+        // position: 'relative',
+        // overflow: 'hidden' 
+      }}>
+        <AudioWaveContainer>
+          {waveElements}
+        </AudioWaveContainer>
+      </Box>
 
       {/* Timer della registrazione */}
       {isRecording && (
-        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mt: { xs: 0.5, sm: 1 } }}>
           <Chip
-            icon={<TimerIcon />}
+            icon={<TimerIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />}
             label={formatTime(recordingDuration)}
             color="primary"
             sx={{
-              fontSize: '1rem',
-              height: 36,
+              fontSize: { xs: '0.875rem', sm: '1rem' },
+              height: { xs: 28, sm: 36 },
               fontWeight: 'medium',
               animation: isPaused ? 'none' : `${pulse} 2s infinite`,
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
@@ -620,10 +659,16 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       )}
 
       {/* Bottoni di controllo */}
-      <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        gap: { xs: 1, sm: 2 }, 
+        mt: { xs: 1, sm: 2 },
+        flexWrap: 'wrap',
+        justifyContent: 'center'
+      }}>
         <Button
           variant="contained"
-          startIcon={isRecording ? <StopIcon /> : <MicIcon />}
+          startIcon={isRecording ? <StopIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} /> : <MicIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />}
           onClick={isRecording ? stopRecording : startRecording}
           sx={{ 
             borderRadius: 2,
@@ -631,6 +676,10 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
             color: '#000000',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             transition: 'all 0.2s ease-in-out',
+            fontSize: { xs: '0.875rem', sm: '0.9rem' },
+            py: { xs: 0.75, sm: 1 },
+            px: { xs: 2, sm: 3 },
+            minWidth: { xs: '45%', sm: 'auto' },
             '&:hover': {
               backgroundColor: '#e5e5e7',
               boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
@@ -643,7 +692,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
         {isRecording && (
           <Button
             variant="contained"
-            startIcon={isPaused ? <PlayIcon /> : <PauseIcon />}
+            startIcon={isPaused ? <PlayIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} /> : <PauseIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />}
             onClick={isPaused ? resumeRecording : pauseRecording}
             sx={{ 
               borderRadius: 2,
@@ -651,6 +700,10 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
               color: '#000000',
               boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
               transition: 'all 0.2s ease-in-out',
+              fontSize: { xs: '0.875rem', sm: '0.9rem' },
+              py: { xs: 0.75, sm: 1 },
+              px: { xs: 2, sm: 3 },
+              minWidth: { xs: '45%', sm: 'auto' },
               '&:hover': {
                 backgroundColor: '#e5e5e7',
                 boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
@@ -672,6 +725,10 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
                 color: '#000000',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 transition: 'all 0.2s ease-in-out',
+                fontSize: { xs: '0.875rem', sm: '0.9rem' },
+                py: { xs: 0.75, sm: 1 },
+                px: { xs: 2, sm: 3 },
+                minWidth: { xs: '45%', sm: 'auto' },
                 '&:hover': {
                   backgroundColor: '#e5e5e7',
                   boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
@@ -683,7 +740,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
             </Button>
             <Button
               variant="contained"
-              startIcon={<TextFieldsIcon />}
+              startIcon={<TextFieldsIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />}
               onClick={() => transcribeAudio(currentBlobRef.current)}
               disabled={isTranscribing}
               sx={{ 
@@ -692,6 +749,10 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
                 color: '#000000',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
                 transition: 'all 0.2s ease-in-out',
+                fontSize: { xs: '0.875rem', sm: '0.9rem' },
+                py: { xs: 0.75, sm: 1 },
+                px: { xs: 2, sm: 3 },
+                minWidth: { xs: '45%', sm: 'auto' },
                 '&:hover': {
                   backgroundColor: '#e5e5e7',
                   boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
@@ -706,13 +767,17 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
         <Button
           variant="contained"
           component="label"
-          startIcon={<UploadIcon />}
+          startIcon={<UploadIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />}
           sx={{ 
             borderRadius: 2,
             backgroundColor: '#f5f5f7',
             color: '#000000',
             boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
             transition: 'all 0.2s ease-in-out',
+            fontSize: { xs: '0.875rem', sm: '0.9rem' },
+            py: { xs: 0.75, sm: 1 },
+            px: { xs: 2, sm: 3 },
+            minWidth: { xs: '45%', sm: 'auto' },
             '&:hover': {
               backgroundColor: '#e5e5e7',
               boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
@@ -731,10 +796,20 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       </Box>
 
       {audioUrl && (
-        <Box sx={{ width: '100%', mt: 2 }}>
+        <Box sx={{ 
+          width: '100%', 
+          mt: { xs: 1, sm: 2 },
+          px: { xs: 1, sm: 2 }
+        }}>
           <AppleAudioPlayer 
             src={audioUrl} 
             controls 
+            sx={{
+              height: { xs: 32, sm: 40 },
+              '& ::-webkit-media-controls-panel': {
+                p: { xs: 0.5, sm: 1 }
+              }
+            }}
           />
         </Box>
       )}
@@ -744,29 +819,35 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
         <Box sx={{ 
           display: 'flex', 
           alignItems: 'center', 
-          gap: 1,
+          gap: { xs: 0.5, sm: 1 },
           color: theme.palette.primary.main,
-          mt: 1
+          mt: { xs: 0.5, sm: 1 }
         }}>
-          <CircularProgress size={16} />
-          <Typography variant="body2">
+          <CircularProgress size={{ xs: 14, sm: 16 }} />
+          <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
             Conversione in corso...
           </Typography>
         </Box>
       )}
 
       {isTranscribing && (
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <CircularProgress size={24} sx={{ mr: 1 }} />
-          <Typography variant="body2" color="text.secondary">
+        <Box sx={{ 
+          mt: { xs: 1, sm: 2 }, 
+          textAlign: 'center' 
+        }}>
+          <CircularProgress size={{ xs: 20, sm: 24 }} sx={{ mr: { xs: 0.5, sm: 1 } }} />
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
             {transcriptionStatus}
           </Typography>
         </Box>
       )}
 
       {transcriptionError && (
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <Typography variant="body2" color="error">
+        <Box sx={{ 
+          mt: { xs: 1, sm: 2 }, 
+          textAlign: 'center' 
+        }}>
+          <Typography variant="body2" color="error" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
             {transcriptionError}
           </Typography>
         </Box>

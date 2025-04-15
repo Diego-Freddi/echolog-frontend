@@ -154,6 +154,11 @@ const History = () => {
   // Gestione del download dell'audio
   const handleDownloadAudio = async (analysis) => {
     try {
+      // Verifica se l'audio è disponibile
+      if (!analysis.audio || !analysis.audio.available) {
+        throw new Error('Audio non più disponibile');
+      }
+
       // Ottieni il token dall'utente corrente
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user?.token) {
@@ -181,6 +186,9 @@ const History = () => {
       });
 
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Audio non più disponibile');
+        }
         throw new Error(`Errore nel download del file: ${response.status}`);
       }
 
@@ -200,11 +208,12 @@ const History = () => {
       link.click();
       document.body.removeChild(link);
       
-      // Rilascia l'URL oggetto
+      // Pulisci l'URL oggetto
       window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Errore nel download dell\'audio:', err);
-      setError('Si è verificato un errore durante il download dell\'audio. Riprova più tardi.');
+    } catch (error) {
+      console.error('Errore nel download dell\'audio:', error);
+      // Mostra un messaggio di errore all'utente
+      setError(error.message || 'Si è verificato un errore durante il download dell\'audio');
     }
   };
 
@@ -264,6 +273,23 @@ const History = () => {
       setLoading(false);
     }
   };
+
+  // Inizializza il tab all'indice 1 su mobile, 0 su desktop
+  useEffect(() => {
+    const isMobile = window.innerWidth < 600; // breakpoint 'sm' di MUI è 600px
+    setTabValue(isMobile ? 1 : 0);
+
+    // Opzionale: Aggiungi listener per cambiare tab se la dimensione dello schermo cambia
+    const handleResize = () => {
+      const isMobileNow = window.innerWidth < 600;
+      if (isMobileNow && tabValue === 0) {
+        setTabValue(1);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <PageContainer>
@@ -333,7 +359,7 @@ const History = () => {
                 }
               }}
             >
-              <Tab label="Riepilogo" id="tab-0" aria-controls="tabpanel-0" />
+              <Tab label="Riepilogo" id="tab-0" aria-controls="tabpanel-0" sx={{ display: { xs: 'none', sm: 'block' } }} />
               <Tab label="Trascrizioni e Analisi" id="tab-1" aria-controls="tabpanel-1" />
             </Tabs>
           </Box>
@@ -510,8 +536,8 @@ const History = () => {
               </Box>
             ) : (
               <>
-                <TableContainer component={ApplePaper} sx={{ mb: 3, p: 0, overflow: 'hidden' }}>
-                  <Table sx={{ minWidth: 650 }}>
+                <TableContainer component={ApplePaper} sx={{ mb: 3, p: 0, overflow: { xs: 'auto', sm: 'hidden' } }}>
+                  <Table sx={{ minWidth: { xs: 400, sm: 650 } }}>
                     <TableHead>
                       <TableRow sx={{ 
                         backgroundColor: 'rgba(240, 44, 86, 0.03)',
@@ -519,8 +545,8 @@ const History = () => {
                       }}>
                         <TableCell sx={{ fontWeight: 600 }}>Data</TableCell>
                         <TableCell sx={{ fontWeight: 600 }}>Riepilogo</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Parole Chiave</TableCell>
-                        <TableCell sx={{ fontWeight: 600 }}>Stato Audio</TableCell>
+                        <TableCell sx={{ fontWeight: 600, display: { xs: 'none', md: 'table-cell' } }}>Parole Chiave</TableCell>
+                        <TableCell sx={{ fontWeight: 600, display: { xs: 'none', sm: 'table-cell' } }}>Stato Audio</TableCell>
                         <TableCell sx={{ fontWeight: 600 }}>Azioni</TableCell>
                       </TableRow>
                     </TableHead>
@@ -538,7 +564,7 @@ const History = () => {
                         >
                           <TableCell>
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <CalendarTodayIcon sx={{ color: '#7c32ff', mr: 1, fontSize: 20 }} />
+                              <CalendarTodayIcon sx={{ color: '#7c32ff', mr: 1, fontSize: { xs: 16, sm: 20 } }} />
                               <Typography variant="body2">
                                 {formatDate(analysis.createdAt)}
                               </Typography>
@@ -546,10 +572,10 @@ const History = () => {
                           </TableCell>
                           <TableCell>
                             <Typography variant="body2">
-                              {getSummaryExcerpt(analysis.summary)}
+                              {getSummaryExcerpt(analysis.summary, window.innerWidth < 600 ? 60 : 100)}
                             </Typography>
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, maxWidth: 280 }}>
                               {analysis.keywords && analysis.keywords.slice(0, 3).map((keyword, idx) => (
                                 <Chip 
@@ -578,7 +604,7 @@ const History = () => {
                               )}
                             </Box>
                           </TableCell>
-                          <TableCell>
+                          <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                             {analysis.audio && analysis.audio.available ? (
                               <Tooltip title={`Scade il ${formatDate(analysis.audio.expiresOn)}`}>
                                 <Chip 
@@ -589,19 +615,9 @@ const History = () => {
                                   sx={{ height: 24, fontSize: '0.75rem', borderRadius: '12px' }}
                                 />
                               </Tooltip>
-                            ) : analysis.transcriptionId ? (
-                              <Tooltip title="Questa trascrizione è collegata a un file audio">
-                                <Chip 
-                                  label="Audio Disponibile" 
-                                  size="small" 
-                                  color="success" 
-                                  variant="outlined"
-                                  sx={{ height: 24, fontSize: '0.75rem', borderRadius: '12px' }}
-                                />
-                              </Tooltip>
                             ) : (
                               <Chip 
-                                label="Non disponibile" 
+                                label="Scaduto" 
                                 size="small" 
                                 color="error" 
                                 variant="outlined"
@@ -625,12 +641,13 @@ const History = () => {
                                   <VisibilityIcon fontSize="small" />
                                 </IconButton>
                               </Tooltip>
-                              {analysis.transcriptionId && (
+                              {analysis.audio && analysis.audio.available && (
                                 <Tooltip title="Scarica Audio">
                                   <IconButton 
                                     size="small" 
                                     sx={{ 
                                       color: '#7c32ff',
+                                      display: { xs: 'none', sm: 'inline-flex' },
                                       '&:hover': {
                                         backgroundColor: 'rgba(124, 50, 255, 0.1)'
                                       }

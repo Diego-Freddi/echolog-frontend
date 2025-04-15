@@ -32,12 +32,15 @@ function TabPanel(props) {
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
+      id={`transcription-tabpanel-${index}`}
+      aria-labelledby={`transcription-tab-${index}`}
       {...other}
     >
       {value === index && (
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ 
+          p: { xs: 1, sm: 2, md: 3 },
+          overflow: 'auto'
+        }}>
           {children}
         </Box>
       )}
@@ -173,217 +176,291 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
   if (!text && !loading) return null;
 
   return (
-    <Box 
-      sx={{ 
-        width: '100%', 
-        mt: 3, 
-        backgroundColor: theme.palette.background.paper,
-        borderRadius: 2,
-        border: '1px solid rgba(0,0,0,0.1)',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-        overflow: 'hidden'
-      }}
-    >
-      <Tabs 
-        value={tabValue} 
-        onChange={handleTabChange}
-        sx={{
-          backgroundColor: theme.palette.background.paper,
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          '& .MuiTabs-indicator': {
-            backgroundColor: theme.palette.primary.main,
-          }
-        }}
-      >
-        <Tab 
-          icon={<TextFieldsIcon />} 
-          label="Trascrizione" 
-          sx={{ 
-            textTransform: 'none',
-            fontWeight: 500,
-            color: theme.palette.text.primary,
-            '&.Mui-selected': {
-              color: theme.palette.primary.main,
+    <Box sx={{ width: '100%' }}>
+      {/* Tabs container */}
+      <Box sx={{ 
+        borderBottom: 1, 
+        borderColor: 'divider',
+        mb: { xs: 1, sm: 2 },
+        position: 'sticky',
+        top: 0,
+        backgroundColor: theme.palette.background.default,
+        zIndex: 1
+      }}>
+        <Tabs 
+          value={tabValue} 
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
+          sx={{
+            '& .MuiTab-root': {
+              minHeight: { xs: 48, sm: 56 },
+              fontSize: { xs: '0.875rem', sm: '0.9rem' },
+              px: { xs: 1, sm: 2 },
             }
           }}
-        />
-        <Tab 
-          icon={<PsychologyIcon />} 
-          label="Analisi"
-          disabled={!text || loading || isEditing}
-          sx={{ 
-            textTransform: 'none',
-            fontWeight: 500,
-            color: theme.palette.text.primary,
-            '&.Mui-selected': {
-              color: theme.palette.primary.main,
-            }
-          }}
-        />
-      </Tabs>
+        >
+          <Tab 
+            icon={<TextFieldsIcon />} 
+            label="Trascrizione" 
+            sx={{
+              flexDirection: { xs: 'row', sm: 'column' },
+              gap: { xs: 1, sm: 0 },
+              '& .MuiTab-iconWrapper': {
+                mr: { xs: 1, sm: 0 }
+              }
+            }}
+          />
+          <Tab 
+            icon={<PsychologyIcon />} 
+            label="Analisi"
+            sx={{
+              flexDirection: { xs: 'row', sm: 'column' },
+              gap: { xs: 1, sm: 0 },
+              '& .MuiTab-iconWrapper': {
+                mr: { xs: 1, sm: 0 }
+              }
+            }}
+          />
+        </Tabs>
+      </Box>
 
+      {/* Trascrizione Panel */}
       <TabPanel value={tabValue} index={0}>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-            <CircularProgress size={24} />
-          </Box>
-        ) : error ? (
-          <Typography variant="body1" color="error" sx={{ p: 2 }}>
-            {error}
-          </Typography>
-        ) : (
-          <>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ color: theme.palette.primary.main }}>
-                Trascrizione
-              </Typography>
-              
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {!isEditing && analysis && (
-                  <Tooltip title="Evidenzia parole chiave nel testo">
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={highlightKeywords}
-                          onChange={(e) => setHighlightKeywords(e.target.checked)}
-                          color="primary"
-                          size="small"
-                        />
-                      }
-                      label={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <HighlightIcon fontSize="small" color={highlightKeywords ? 'primary' : 'action'} />
-                          <Typography variant="body2">Evidenzia</Typography>
-                        </Box>
-                      }
-                    />
-                  </Tooltip>
-                )}
-                
+        <Box sx={{ 
+          position: 'relative',
+          mb: { xs: 2, sm: 3 }
+        }}>
+          {/* Controlli trascrizione */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+            gap: 1,
+            mb: { xs: 1, sm: 2 }
+          }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={highlightKeywords}
+                  onChange={(e) => setHighlightKeywords(e.target.checked)}
+                  color="primary"
+                  size="small"
+                />
+              }
+              label={
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                  Evidenzia parole chiave
+                </Typography>
+              }
+            />
+            
+            {typeof onTextChange === 'function' && (
+              <Box sx={{ display: 'flex', gap: 1 }}>
                 {isEditing ? (
                   <>
                     <Tooltip title="Salva modifiche">
                       <IconButton 
+                        size="small" 
                         onClick={handleSave}
-                        color="primary"
-                        size="small"
+                        sx={{ display: { xs: 'flex', sm: 'none' } }}
                       >
                         <SaveIcon />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Annulla modifiche">
+                    <Button
+                      variant="contained"
+                      startIcon={<SaveIcon />}
+                      onClick={handleSave}
+                      size="small"
+                      sx={{ 
+                        display: { xs: 'none', sm: 'flex' },
+                        borderRadius: 2
+                      }}
+                    >
+                      Salva
+                    </Button>
+
+                    <Tooltip title="Annulla">
                       <IconButton 
+                        size="small" 
                         onClick={handleCancel}
-                        color="default"
-                        size="small"
+                        sx={{ display: { xs: 'flex', sm: 'none' } }}
                       >
                         <CancelIcon />
                       </IconButton>
                     </Tooltip>
+                    <Button
+                      variant="outlined"
+                      startIcon={<CancelIcon />}
+                      onClick={handleCancel}
+                      size="small"
+                      sx={{ 
+                        display: { xs: 'none', sm: 'flex' },
+                        borderRadius: 2
+                      }}
+                    >
+                      Annulla
+                    </Button>
                   </>
                 ) : (
-                  <Tooltip title="Modifica trascrizione">
-                    <IconButton 
+                  <>
+                    <Tooltip title="Modifica">
+                      <IconButton 
+                        size="small" 
+                        onClick={handleEditStart}
+                        sx={{ display: { xs: 'flex', sm: 'none' } }}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Button
+                      variant="outlined"
+                      startIcon={<EditIcon />}
                       onClick={handleEditStart}
-                      color="default"
                       size="small"
+                      sx={{ 
+                        display: { xs: 'none', sm: 'flex' },
+                        borderRadius: 2
+                      }}
                     >
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
+                      Modifica
+                    </Button>
+                  </>
                 )}
               </Box>
-            </Box>
-            
-            {isEditing ? (
-              <TextField
-                multiline
-                fullWidth
-                value={editableText}
-                onChange={(e) => setEditableText(e.target.value)}
-                variant="outlined"
-                minRows={10}
-                maxRows={20}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    bgcolor: theme.palette.background.paper,
-                    borderRadius: 2,
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: theme.palette.primary.main,
-                      borderWidth: 1,
-                    }
-                  }
-                }}
-              />
-            ) : (
-              <Typography 
-                variant="body1" 
-                sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}
-                dangerouslySetInnerHTML={{ __html: processedText }}
-              />
             )}
+          </Box>
 
-            {/* Mostra banner per chiedere se rianalizzare dopo la modifica */}
-            {shouldReanalyze && (
-              <Box sx={{ 
-                mt: 3,
-                p: 2, 
-                bgcolor: 'rgba(240, 44, 86, 0.1)', 
-                borderRadius: 2,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <Typography variant="body2">
-                  Vuoi aggiornare l'analisi con il testo modificato?
-                </Typography>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <Button 
-                    size="small" 
-                    variant="outlined"
-                    onClick={() => setShouldReanalyze(false)}
-                    sx={{ borderRadius: 2 }}
-                  >
-                    No
-                  </Button>
-                  <Button 
-                    size="small" 
-                    variant="contained"
-                    onClick={handleReanalyze}
-                    sx={{ 
-                      borderRadius: 2,
-                      bgcolor: theme.palette.primary.main 
-                    }}
-                  >
-                    Aggiorna analisi
-                  </Button>
-                </Box>
-              </Box>
-            )}
-          </>
+          {/* Contenuto trascrizione */}
+          {isEditing ? (
+            <TextField
+              multiline
+              fullWidth
+              value={editableText}
+              onChange={(e) => setEditableText(e.target.value)}
+              variant="outlined"
+              placeholder="Inserisci il testo della trascrizione..."
+              minRows={5}
+              maxRows={20}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: theme.palette.background.paper,
+                  fontSize: { xs: '0.875rem', sm: '1rem' },
+                  lineHeight: { xs: 1.5, sm: 1.75 }
+                }
+              }}
+            />
+          ) : (
+            <Typography 
+              variant="body1" 
+              component="div"
+              dangerouslySetInnerHTML={{ 
+                __html: highlightKeywords ? processedText : text 
+              }}
+              sx={{
+                whiteSpace: 'pre-wrap',
+                fontSize: { xs: '0.875rem', sm: '1rem' },
+                lineHeight: { xs: 1.5, sm: 1.75 },
+                wordBreak: 'break-word'
+              }}
+            />
+          )}
+        </Box>
+
+        {/* Banner rianalisi */}
+        {shouldReanalyze && (
+          <Box sx={{ 
+            mt: { xs: 2, sm: 3 },
+            p: { xs: 1.5, sm: 2 },
+            borderRadius: 2,
+            backgroundColor: theme.palette.mode === 'dark' 
+              ? 'rgba(240,44,86,0.1)' 
+              : 'rgba(240,44,86,0.05)',
+            display: 'flex',
+            flexDirection: { xs: 'column', sm: 'row' },
+            alignItems: { xs: 'stretch', sm: 'center' },
+            gap: { xs: 1, sm: 2 }
+          }}>
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                flex: 1,
+                fontSize: { xs: '0.75rem', sm: '0.875rem' }
+              }}
+            >
+              Il testo è stato modificato. Vuoi aggiornare l'analisi?
+            </Typography>
+            <Box sx={{ 
+              display: 'flex', 
+              gap: 1,
+              justifyContent: { xs: 'flex-end', sm: 'flex-start' }
+            }}>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => {
+                  setShouldReanalyze(false);
+                  performAnalysis(editableText, true);
+                }}
+                sx={{ borderRadius: 2 }}
+              >
+                Aggiorna
+              </Button>
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => setShouldReanalyze(false)}
+                sx={{ borderRadius: 2 }}
+              >
+                No
+              </Button>
+            </Box>
+          </Box>
         )}
       </TabPanel>
 
+      {/* Analisi Panel */}
       <TabPanel value={tabValue} index={1}>
         {analysisLoading ? (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3, gap: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: 2,
+            p: { xs: 2, sm: 3 }
+          }}>
             <CircularProgress size={30} />
-            <Typography variant="body2" color="text.secondary">
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+            >
               Analisi con Gemini in corso...
             </Typography>
           </Box>
         ) : analysisError ? (
-          <Box sx={{ textAlign: 'center', p: 3 }}>
-            <Typography variant="body1" color="error" gutterBottom>
+          <Box sx={{ 
+            textAlign: 'center', 
+            p: { xs: 2, sm: 3 }
+          }}>
+            <Typography 
+              variant="body1" 
+              color="error" 
+              gutterBottom
+              sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+            >
               {analysisError}
             </Typography>
             <Button 
               variant="outlined" 
               onClick={performAnalysis}
-              sx={{ mt: 2 }}
+              sx={{ 
+                mt: { xs: 1, sm: 2 },
+                borderRadius: 2
+              }}
             >
               Riprova
             </Button>
@@ -407,7 +484,13 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
             }}
           />
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', p: 3, gap: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'center',
+            gap: 2,
+            p: { xs: 2, sm: 3 }
+          }}>
             <Button 
               variant="contained" 
               onClick={performAnalysis}
