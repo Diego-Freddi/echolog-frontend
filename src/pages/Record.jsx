@@ -12,7 +12,7 @@ const Record = () => {
     <PageContainer>
       <Box sx={{
         ...containerStyles,
-        maxWidth: '650px',
+        maxWidth: '800px',
       }}>
         <ApplePaper>
           <Typography 

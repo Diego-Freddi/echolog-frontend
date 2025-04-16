@@ -4,9 +4,24 @@ import { keyframes } from '@mui/material';
  * Sistema centralizzato di stili e temi per l'applicazione EchoLog
  * Questo file contiene colori, animazioni, e stili di base comuni 
  * che possono essere riutilizzati in tutti i componenti dell'applicazione.
+ * 
+ * GUIDA ALL'USO:
+ * - Importare i valori necessari da questo file
+ * - Estendere gli stili base usando lo spread operator (...BUTTON_STYLES.base)
+ * - NON sovrascrivere i valori base senza una ragione specifica
+ * - Documentare qualsiasi deroga dai valori standard
  */
 
 // ----- COLORI ----- //
+
+/**
+ * Colori dell'applicazione
+ * - primary: colori principali del brand
+ * - secondary: colori complementari del brand
+ * - accent: colori per enfasi e contrasto
+ * - neutral: scala di grigi e bianchi/neri
+ * - state: colori per stati funzionali (successo, errore, ecc.)
+ */
 export const COLORS = {
   // Colori primari
   primary: {
@@ -47,6 +62,15 @@ export const COLORS = {
 };
 
 // ----- GRADIENTI ----- //
+
+/**
+ * Gradienti predefiniti
+ * - primary: gradiente principale del brand
+ * - primaryHover: versione più scura per hover
+ * - navbar: gradiente speciale per la navbar
+ * - background: gradiente sottile per sfondi
+ * - card: gradiente per carte con alpha
+ */
 export const GRADIENTS = {
   primary: `linear-gradient(45deg, ${COLORS.primary.main} 0%, ${COLORS.secondary.main} 100%)`,
   primaryHover: `linear-gradient(45deg, ${COLORS.primary.dark} 0%, ${COLORS.secondary.dark} 100%)`,
@@ -56,6 +80,14 @@ export const GRADIENTS = {
 };
 
 // ----- ANIMAZIONI ----- //
+
+/**
+ * Animazioni keyframe riutilizzabili
+ * - pulse: effetto pulsante, usato per elementi attivi/in registrazione
+ * - fadeIn: apparizione graduale, usato per transizioni
+ * - slideUp: movimento dal basso, usato per elementi che appaiono
+ * - breathe: leggero respiro, usato per enfasi sottile
+ */
 export const ANIMATIONS = {
   // Animazione di pulsazione
   pulse: keyframes`
@@ -107,6 +139,19 @@ export const ANIMATIONS = {
 };
 
 // ----- OMBRE ----- //
+
+/**
+ * Sistema di ombre
+ * - sm/md/lg/xl: ombre generiche con profondità crescente
+ * - inner: ombra interna per elementi incassati
+ * - primary*: ombre colorate per elementi primari
+ * 
+ * Uso:
+ * - sm: per elementi leggeri (bottoni, chips)
+ * - md: per card e contenitori
+ * - lg: per elementi elevati (dialoghi, popovers)
+ * - xl: per elementi in primo piano (modali)
+ */
 export const SHADOWS = {
   sm: '0 2px 4px rgba(0,0,0,0.1)',
   md: '0 4px 8px rgba(0,0,0,0.12)',
@@ -119,14 +164,32 @@ export const SHADOWS = {
 };
 
 // ----- BORDI ----- //
+
+/**
+ * Sistema di bordi
+ * - radius: arrotondamento angoli con progressione logica
+ * - width: spessori bordo standard
+ * - style: stili bordo (solid, dashed)
+ * - component: bordi predefiniti per stati componenti
+ * 
+ * Guida all'uso dei border radius:
+ * - none (0px): nessun arrotondamento
+ * - xs (1px): minimo arrotondamento (chip, tag piccoli)
+ * - sm (2px): arrotondamento leggero (bottoni, input)
+ * - md (4px): arrotondamento medio (card piccole, tooltip)
+ * - lg (8px): arrotondamento ampio (card, dialoghi)
+ * - xl (16px): arrotondamento massimo (container principali)
+ * - round: elementi circolari (avatar, badge)
+ */
 export const BORDERS = {
   radius: {
-    xs: 2,  // 2px
-    sm: 2,  // 2px
-    md: 4,  // 4px
-    lg: 8,  // 8px
-    xl: 16, // 16px
-    round: '50%'
+    none: 0,    // 0px - nessun arrotondamento
+    xs: 1,      // 1px - minimo arrotondamento (chip, tag piccoli)
+    sm: 2,      // 2px - arrotondamento leggero (bottoni, input)
+    md: 4,      // 4px - arrotondamento medio (card piccole, tooltip)
+    lg: 8,      // 8px - arrotondamento ampio (card, dialoghi)
+    xl: 16,     // 16px - arrotondamento massimo (container principali)
+    round: '50%' // per elementi circolari (avatar, badge)
   },
   width: {
     thin: 1,   // 1px
@@ -143,16 +206,33 @@ export const BORDERS = {
     default: '1px solid rgba(240,44,86,0.1)',
     hover: '1px solid rgba(240,44,86,0.2)',
     focus: '1px solid rgba(240,44,86,0.4)'
-  },
-  // Bordo con gradiente primario in alto
-  topGradient: {
-    top: `${COLORS.primary.main}`,
-    radius: 8,
-    width: 4
   }
 };
 
+/**
+ * Bordo con gradiente primario in alto
+ * Separato dalla definizione di BORDERS per evitare riferimenti circolari
+ */
+export const TOP_GRADIENT_BORDER = {
+  top: `${COLORS.primary.main}`,
+  radius: 8,     // Equivalente a BORDERS.radius.lg
+  width: 4       // Equivalente a BORDERS.width.thick
+};
+
 // ----- SPAZIATURE ----- //
+
+/**
+ * Sistema di spaziature responsive
+ * La scala è basata su multiple di 4px
+ * Ogni dimensione ha varianti per dimensioni schermo xs e sm
+ * 
+ * Uso:
+ * - xs: spaziature minime (padding interno, gap piccoli)
+ * - sm: spaziature ridotte (padding bottoni, gap elementi)
+ * - md: spaziature standard (margini componenti, padding container)
+ * - lg: spaziature ampie (sezioni, card)
+ * - xl: spaziature massime (container principali, hero section)
+ */
 export const SPACING = {
   // Scale: numero * 4px
   xs: { xs: 0.5, sm: 0.75 },  // 2px - 3px
@@ -163,6 +243,23 @@ export const SPACING = {
 };
 
 // ----- TIPOGRAFIA ----- //
+
+/**
+ * Sistema tipografico
+ * - fontFamily: font stack predefinito
+ * - fontWeights: pesi standard da light a bold
+ * - fontSize: dimensioni responsive con varianti xs/sm
+ * - lineHeight: altezze riga standard
+ * 
+ * Uso fontSize:
+ * - xs: testo molto piccolo (note, label, caption)
+ * - sm: testo piccolo (testo secondario, bottoni)
+ * - md: testo normale (corpo principale)
+ * - lg: testo grande (sottotitoli, intestazioni minori)
+ * - xl: titoli piccoli (h3, h4)
+ * - xxl: titoli medi (h2)
+ * - display: titoli grandi (h1)
+ */
 export const TYPOGRAPHY = {
   fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
   fontWeights: {
@@ -190,7 +287,18 @@ export const TYPOGRAPHY = {
 
 // ----- STILI COMPONENTI COMUNI ----- //
 
-// Stili per bottoni apple-like
+/**
+ * Stili per bottoni
+ * 
+ * Pattern di estensione corretto:
+ * ```
+ * const myButton = {
+ *   ...BUTTON_STYLES.base,        // Estendi sempre gli stili base
+ *   ...BUTTON_STYLES.primary,     // Applica variante se necessario
+ *   // Aggiungi proprietà specifiche senza sovrascrivere valori base
+ * }
+ * ```
+ */
 export const BUTTON_STYLES = {
   // Stile di base per tutti i bottoni
   base: {
@@ -235,6 +343,7 @@ export const BUTTON_STYLES = {
   
   // Bottone primary
   primary: {
+    borderRadius: BORDERS.radius.lg,
     background: GRADIENTS.primary,
     color: COLORS.primary.contrastText,
     boxShadow: SHADOWS.primarySm,
@@ -276,7 +385,13 @@ export const BUTTON_STYLES = {
   })
 };
 
-// Stili per card e paper
+/**
+ * Stili per card e paper
+ * 
+ * Uso:
+ * - base: stile base per tutte le card
+ * - gradient: aggiunge bordo sfumato in alto
+ */
 export const CARD_STYLES = {
   base: {
     borderRadius: BORDERS.radius.lg,
@@ -305,7 +420,12 @@ export const CARD_STYLES = {
   }
 };
 
-// Stili per input e form
+/**
+ * Stili per input e form
+ * 
+ * Uso:
+ * - base: stile base per tutti gli input
+ */
 export const INPUT_STYLES = {
   base: {
     borderRadius: BORDERS.radius.sm,
@@ -318,7 +438,13 @@ export const INPUT_STYLES = {
   }
 };
 
-// Stili per etichette e chip
+/**
+ * Stili per etichette e chip
+ * 
+ * Uso:
+ * - base: stile base per tutti i chip
+ * - primary: variante primaria
+ */
 export const CHIP_STYLES = {
   base: {
     borderRadius: BORDERS.radius.sm,
@@ -337,7 +463,9 @@ export const CHIP_STYLES = {
   }
 };
 
-// Utilità per campi di testo
+/**
+ * Utilità per campi di testo (MUI specific)
+ */
 export const TEXT_FIELD_STYLES = {
   base: {
     '& .MuiOutlinedInput-root': {
@@ -353,7 +481,14 @@ export const TEXT_FIELD_STYLES = {
   }
 };
 
-// Stili per contenitori responsive
+/**
+ * Stili per contenitori responsive
+ * 
+ * Uso:
+ * - responsiveBox: contenitore base con padding responsive
+ * - flexCenter: centralizza contenuto su entrambi gli assi
+ * - flexBetween: distribuisce contenuto con spazio
+ */
 export const CONTAINER_STYLES = {
   responsiveBox: {
     width: '100%',
@@ -380,6 +515,7 @@ export default {
   ANIMATIONS,
   SHADOWS,
   BORDERS,
+  TOP_GRADIENT_BORDER,  // Esportiamo anche il nuovo oggetto
   SPACING,
   TYPOGRAPHY,
   BUTTON_STYLES,

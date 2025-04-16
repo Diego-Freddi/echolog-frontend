@@ -4,10 +4,13 @@ import {
   COLORS, 
   GRADIENTS, 
   SHADOWS, 
-  BORDERS, 
+  BORDERS,
+  TOP_GRADIENT_BORDER,
   CARD_STYLES,
   TYPOGRAPHY,
-  BUTTON_STYLES
+  BUTTON_STYLES,
+  SPACING,
+  CONTAINER_STYLES
 } from './themes';
 
 /**
@@ -39,8 +42,8 @@ export const ApplePaper = styled(Paper)(({ theme }) => ({
     top: 0,
     left: 0,
     right: 0,
-    height: BORDERS.width.thick,
-    background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)',
+    height: TOP_GRADIENT_BORDER.width,
+    background: GRADIENTS.navbar,
   }
 }));
 
@@ -49,39 +52,23 @@ export const ApplePaper = styled(Paper)(({ theme }) => ({
  * Utilizzata nelle dashboard per mostrare widget e statistiche
  */
 export const AppleCard = styled(Card)(({ theme }) => ({
-  borderRadius: BORDERS.radius.xl,
-  boxShadow: SHADOWS.md,
+  ...CARD_STYLES.base,
   height: '100%',
   transition: 'transform 0.2s ease-in-out',
-  overflow: 'hidden',
   '&:hover': {
+    ...CARD_STYLES.base['&:hover'],
     transform: 'translateY(-4px)',
-    boxShadow: SHADOWS.lg,
   }
 }));
 
 /**
  * GradientButton - Bottone con sfondo sfumato
+ * Estende correttamente gli stili base dei bottoni
  */
 export const GradientButton = styled(Button)(({ theme }) => ({
-  borderRadius: BORDERS.radius.lg,
-  background: GRADIENTS.primary,
-  textTransform: 'none',
-  color: COLORS.neutral.white,
+  ...BUTTON_STYLES.primary,
   fontSize: '0.9rem',
-  fontWeight: TYPOGRAPHY.fontWeights.medium,
   padding: theme.spacing(1, 3),
-  boxShadow: SHADOWS.primarySm,
-  transition: 'all 0.2s ease-in-out',
-  '&:hover': {
-    background: GRADIENTS.primaryHover,
-    boxShadow: SHADOWS.primaryMd,
-    transform: 'translateY(-2px)'
-  },
-  '&:disabled': {
-    background: theme.palette.action.disabledBackground,
-    color: theme.palette.action.disabled
-  }
 }));
 
 // ---------- OGGETTI DI STILE ---------- //
@@ -90,9 +77,13 @@ export const GradientButton = styled(Button)(({ theme }) => ({
  * pageTitleStyles - Stili per i titoli delle pagine
  */
 export const pageTitleStyles = {
-  fontWeight: 600,
-  fontSize: { xs: '1.25rem', sm: '1.5rem', md: '1.75rem' },
-  background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)',
+  fontWeight: TYPOGRAPHY.fontWeights.semibold,
+  fontSize: { 
+    xs: TYPOGRAPHY.fontSize.xl.xs, 
+    sm: TYPOGRAPHY.fontSize.xl.sm, 
+    md: TYPOGRAPHY.fontSize.xxl.xs 
+  },
+  background: GRADIENTS.navbar,
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
   mb: { xs: 2, sm: 3 },
@@ -112,10 +103,10 @@ export const pageSubtitleStyles = {
  * containerStyles - Stili per i contenitori di pagina
  */
 export const containerStyles = {
+  ...CONTAINER_STYLES.responsiveBox,
   width: { xs: '100%', md: '90%', lg: '80%' },
   maxWidth: '1200px',
   mx: 'auto',
-  p: { xs: 2, md: 3 },
 };
 
 /**
@@ -130,56 +121,41 @@ export const headerStyles = {
     color: COLORS.primary.main
   },
   title: {
-    fontWeight: 600
+    fontWeight: TYPOGRAPHY.fontWeights.semibold
   }
 };
 
 /**
  * buttonStyles - Stili per vari tipi di bottoni
+ * Estende correttamente gli stili base
  */
 export const buttonStyles = {
   // Stile bottone primario
   primary: {
-    borderRadius: BORDERS.radius.lg,
-    textTransform: 'none',
+    ...BUTTON_STYLES.base,
+    ...BUTTON_STYLES.primary,
     px: 3,
-    py: 1.5,
-    background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)',
-    fontWeight: 500,
-    boxShadow: '0 4px 12px rgba(240,44,86,0.2)',
-    '&:hover': {
-      background: 'linear-gradient(90deg, #e02951 0%, #6c2be0 100%)',
-      boxShadow: '0 6px 16px rgba(240,44,86,0.3)',
-      transform: 'translateY(-2px)'
-    }
+    py: 1.5
   },
   
   // Stile bottone secondario
   secondary: {
+    ...BUTTON_STYLES.base,
     borderRadius: BORDERS.radius.sm,
-    textTransform: 'none',
     px: 3, 
     py: 1.5,
-    fontWeight: 500,
+    fontWeight: TYPOGRAPHY.fontWeights.medium,
     border: '1px solid transparent',
     '&:hover': {
-      backgroundColor: 'rgba(240,44,86,0.05)',
-      transform: 'translateY(-1px)'
+      ...BUTTON_STYLES.base['&:hover'],
+      backgroundColor: 'rgba(240,44,86,0.05)'
     }
   },
   
   // Stile bottone per tab
   tab: {
-    borderRadius: BORDERS.radius.md,
-    backgroundColor: 'transparent',
+    ...BUTTON_STYLES.tab,
     color: 'text.secondary',
-    textTransform: 'none',
-    px: 3,
-    py: 1,
-    transition: 'all 0.2s ease-in-out',
-    '&:hover': {
-      backgroundColor: 'rgba(0,0,0,0.04)'
-    },
     '&.active': {
       backgroundColor: 'background.paper',
       color: 'text.primary',
@@ -234,7 +210,7 @@ export const tableStyles = {
   header: { 
     backgroundColor: 'rgba(240, 44, 86, 0.03)',
     '& th': { 
-      fontWeight: 600, 
+      fontWeight: TYPOGRAPHY.fontWeights.semibold, 
       py: 1.5 
     }
   },
@@ -250,13 +226,13 @@ export const tableStyles = {
     display: 'flex',
     justifyContent: 'center',
     '& .MuiPaginationItem-root': {
-      borderRadius: BORDERS.radius.lg,
+      borderRadius: BORDERS.radius.md,
       margin: '0 4px'
     },
     '& .Mui-selected': {
       background: 'linear-gradient(90deg, rgba(240, 44, 86, 0.1) 0%, rgba(124, 50, 255, 0.1) 100%)',
       borderColor: 'transparent',
-      fontWeight: 600
+      fontWeight: TYPOGRAPHY.fontWeights.semibold
     },
     '& .MuiPaginationItem-page:hover': {
       backgroundColor: 'rgba(240, 44, 86, 0.05)'
@@ -271,31 +247,31 @@ export const dialogStyles = {
   paper: {
     borderRadius: BORDERS.radius.xl,
     padding: 1,
-    boxShadow: '0px 10px 38px -10px rgba(0, 0, 0, 0.2), 0px 10px 20px -15px rgba(0, 0, 0, 0.15)',
+    boxShadow: SHADOWS.xl,
   },
   title: { 
-    fontWeight: 600 
+    fontWeight: TYPOGRAPHY.fontWeights.semibold 
   },
   buttons: { 
     padding: 2 
   },
   cancelButton: {
-    borderRadius: BORDERS.radius.lg,
+    ...BUTTON_STYLES.base,
+    borderRadius: BORDERS.radius.md,
     textTransform: 'none',
     borderColor: COLORS.primary.main,
     color: COLORS.primary.main,
     '&:hover': {
+      ...BUTTON_STYLES.base['&:hover'],
       borderColor: COLORS.primary.main,
       backgroundColor: 'rgba(240, 44, 86, 0.05)'
     }
   },
   confirmButton: {
-    borderRadius: BORDERS.radius.lg,
+    ...BUTTON_STYLES.base,
+    ...BUTTON_STYLES.primary,
+    borderRadius: BORDERS.radius.md,
     textTransform: 'none',
-    backgroundColor: COLORS.primary.main,
-    '&:hover': {
-      backgroundColor: COLORS.primary.dark
-    }
   }
 };
 

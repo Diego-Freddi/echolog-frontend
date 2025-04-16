@@ -4,7 +4,8 @@ import {
   TYPOGRAPHY,
   CHIP_STYLES,
   TEXT_FIELD_STYLES,
-  ANIMATIONS
+  ANIMATIONS,
+  BUTTON_STYLES
 } from './themes';
 
 /**
@@ -14,55 +15,59 @@ import {
  */
 
 export const styles = {
-  // Stili per il container principale
+  /**
+   * Layout Principale
+   */
   container: {
-    p: { xs: 0.5, sm: 1 }
+    p: { xs: SPACING.xs.xs, sm: SPACING.xs.sm }
   },
   
-  // Stili per il titolo principale
   mainTitle: (theme) => ({
     color: theme.palette.primary.main,
-    fontSize: TYPOGRAPHY.fontSize.lg,
-    mb: SPACING.sm
+    fontSize: TYPOGRAPHY.fontSize.lg.xs,
+    mb: SPACING.sm.xs
   }),
   
-  // Stili per le intestazioni delle sezioni
+  /**
+   * Sezioni e Intestazioni
+   */
   sectionTitle: (theme) => ({
     color: theme.palette.primary.main,
-    fontSize: { xs: '1rem', sm: '1.25rem' }
+    fontSize: { xs: TYPOGRAPHY.fontSize.md.xs, sm: TYPOGRAPHY.fontSize.lg.xs }
   }),
   
-  // Stili per le icone
   icon: (theme) => ({
     color: theme.palette.primary.main, 
-    mr: 1,
+    mr: SPACING.xs.xs,
     fontSize: { xs: '1.25rem', sm: '1.5rem' }
   }),
   
-  // Stili per i container delle sezioni
   sectionContainer: {
-    mb: { xs: 2, sm: 3 }
+    mb: { xs: SPACING.sm.xs, sm: SPACING.md.xs }
   },
   
-  // Stili per le intestazioni delle sezioni
   sectionHeader: {
     display: 'flex', 
     alignItems: 'center', 
-    mb: { xs: 0.5, sm: 1 }
+    mb: { xs: SPACING.xs.xs, sm: SPACING.xs.sm }
   },
   
-  // Stili per campi di testo
+  /**
+   * Campi di Testo e Input
+   */
   textField: (theme) => ({
     ...TEXT_FIELD_STYLES.base,
     '& .MuiOutlinedInput-root': {
       ...TEXT_FIELD_STYLES.base['& .MuiOutlinedInput-root'],
       bgcolor: theme.palette.background.paper,
       borderRadius: BORDERS.radius.sm,
-      fontSize: { xs: '0.875rem', sm: '1rem' }
+      fontSize: { xs: TYPOGRAPHY.fontSize.sm.xs, sm: TYPOGRAPHY.fontSize.md.xs }
     }
   }),
   
-  // Stili per chip (etichette)
+  /**
+   * Etichette e Chip
+   */
   chip: (theme) => ({ 
     ...CHIP_STYLES.base,
     ...CHIP_STYLES.primary,
@@ -71,47 +76,54 @@ export const styles = {
       : 'rgba(240,44,86,0.1)',
     color: theme.palette.primary.main,
     fontWeight: TYPOGRAPHY.fontWeights.medium,
-    borderRadius: BORDERS.radius.md,
-    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+    borderRadius: BORDERS.radius.sm,
+    fontSize: { xs: TYPOGRAPHY.fontSize.xs.xs, sm: TYPOGRAPHY.fontSize.sm.xs },
     height: { xs: 24, sm: 32 }
   }),
   
-  // Stili per la barra superiore
+  /**
+   * Barra Superiore e Azioni
+   */
   topBar: {
     display: 'flex', 
     justifyContent: 'space-between', 
     alignItems: 'center', 
-    mb: { xs: 1.5, sm: 2 },
+    mb: { xs: SPACING.sm.xs, sm: SPACING.md.xs },
     flexWrap: 'wrap',
-    gap: 1
+    gap: SPACING.xs.xs
   },
   
-  // Stili per il contenitore delle azioni
   actionsContainer: {
     display: 'flex', 
-    gap: 1
+    gap: SPACING.xs.xs
   },
   
-  // Stili per i bottoni
+  /**
+   * Pulsanti
+   */
   button: {
-    borderRadius: BORDERS.radius.sm,
-    fontSize: TYPOGRAPHY.fontSize.sm,
+    ...BUTTON_STYLES.base,
+    fontSize: TYPOGRAPHY.fontSize.sm.xs,
     fontWeight: TYPOGRAPHY.fontWeights.medium
   },
   
   buttonPrimary: (theme) => ({
+    ...BUTTON_STYLES.base,
     borderColor: theme.palette.primary.main,
     color: theme.palette.primary.main,
     '&:hover': {
+      ...BUTTON_STYLES.base['&:hover'],
       backgroundColor: 'rgba(240,44,86,0.04)',
-      borderColor: theme.palette.primary.main,
+      borderColor: theme.palette.primary.main
     }
   }),
   
-  // Stili per gli accordion (sezioni tematiche)
+  /**
+   * Accordion e Sezioni Tematiche
+   */
   accordion: (theme) => ({
-    mb: { xs: 0.5, sm: 1 },
-    borderRadius: `${BORDERS.radius.lg}px!important`,
+    mb: { xs: SPACING.xs.xs, sm: SPACING.xs.sm },
+    borderRadius: `${BORDERS.radius.md}px!important`,
     '&:before': { display: 'none' },
     boxShadow: 'none',
     border: `1px solid ${theme.palette.divider}`,
@@ -126,44 +138,44 @@ export const styles = {
   
   accordionTitle: {
     fontWeight: TYPOGRAPHY.fontWeights.medium,
-    fontSize: { xs: '0.875rem', sm: '1rem' }
+    fontSize: { xs: TYPOGRAPHY.fontSize.sm.xs, sm: TYPOGRAPHY.fontSize.md.xs }
   },
   
   accordionDetails: {
-    p: { xs: 1, sm: 2 }
+    p: { xs: SPACING.xs.xs, sm: SPACING.sm.xs }
   },
   
   accordionContent: {
-    mb: { xs: 1, sm: 2 },
-    fontSize: { xs: '0.875rem', sm: '1rem' },
-    lineHeight: { xs: 1.5, sm: 1.75 }
+    mb: { xs: SPACING.xs.sm, sm: SPACING.sm.xs },
+    fontSize: { xs: TYPOGRAPHY.fontSize.sm.xs, sm: TYPOGRAPHY.fontSize.md.xs },
+    lineHeight: { xs: TYPOGRAPHY.lineHeight.tight, sm: TYPOGRAPHY.lineHeight.normal }
   },
   
-  // Stili per il contenitore delle parole chiave
+  /**
+   * Parole Chiave e Tag Cloud
+   */
   keywordsContainer: {
     display: 'flex', 
     flexWrap: 'wrap', 
-    gap: { xs: 0.5, sm: 1 }
+    gap: { xs: SPACING.xs.xs, sm: SPACING.xs.sm }
   },
   
-  // Stili per la tagcloud - ora è una funzione che accetta il tema
   tagCloud: (theme) => ({
     display: 'flex', 
     justifyContent: 'center', 
-    p: { xs: 1, sm: 2 }, 
+    p: { xs: SPACING.xs.xs, sm: SPACING.sm.xs }, 
     backgroundColor: theme.palette.background.paper,
     borderRadius: BORDERS.radius.sm,
-    mb: { xs: 1, sm: 2 },
+    mb: { xs: SPACING.xs.sm, sm: SPACING.sm.xs },
     overflow: 'hidden'
   }),
   
-  // Stili per gli elementi del TagCloud
   tagCloudItem: (size, theme) => ({
     animation: `${ANIMATIONS.breathe} 3s linear infinite`,
     animationDelay: `${Math.random() * 2}s`,
     fontSize: `${size}px`,
-    margin: '3px',
-    padding: '3px',
+    margin: SPACING.xs.xs,
+    padding: SPACING.xs.xs,
     display: 'inline-block',
     color: theme.palette.text.primary,
     fontWeight: TYPOGRAPHY.fontWeights.bold,
@@ -172,10 +184,12 @@ export const styles = {
     transition: 'all 0.3s ease'
   }),
   
-  // Stili per la sezione di modifica
+  /**
+   * Sezione di Modifica
+   */
   editorSection: (theme) => ({
-    mb: { xs: 1.5, sm: 2 },
-    p: { xs: 1, sm: 2 },
+    mb: { xs: SPACING.sm.xs, sm: SPACING.sm.sm },
+    p: { xs: SPACING.xs.xs, sm: SPACING.sm.xs },
     border: `1px solid ${theme.palette.divider}`,
     borderRadius: BORDERS.radius.sm,
     backgroundColor: theme.palette.background.paper
@@ -185,13 +199,13 @@ export const styles = {
     display: 'flex', 
     alignItems: 'center', 
     justifyContent: 'space-between', 
-    mb: { xs: 1, sm: 2 }
+    mb: { xs: SPACING.xs.sm, sm: SPACING.sm.xs }
   },
   
   smallHeading: (theme) => ({
     fontWeight: TYPOGRAPHY.fontWeights.medium, 
     color: theme.palette.text.primary,
-    fontSize: { xs: '0.75rem', sm: '0.875rem' }
+    fontSize: { xs: TYPOGRAPHY.fontSize.xs.xs, sm: TYPOGRAPHY.fontSize.sm.xs }
   })
 };
 

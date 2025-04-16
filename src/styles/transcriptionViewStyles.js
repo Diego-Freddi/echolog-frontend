@@ -1,201 +1,203 @@
 import { 
-  COLORS, 
   BORDERS, 
   SPACING, 
   TYPOGRAPHY, 
-  SHADOWS 
+  BUTTON_STYLES
 } from './themes';
 
-// Stili per il componente TabPanel
+/**
+ * Stili centralizzati per il componente TranscriptionView
+ * Estende correttamente gli stili base di themes.js
+ */
+
+/**
+ * Stili per il componente TabPanel
+ * Contenitore principale per il contenuto di ogni tab
+ */
 export const tabPanelStyles = {
   container: {
-    p: { xs: 1, sm: 2, md: 3 },
+    p: { xs: SPACING.sm.xs, sm: SPACING.sm.sm, md: SPACING.md.xs },
     overflow: 'auto'
   }
 };
 
-// Funzione per generare lo stile di evidenziazione in base al tema
+/**
+ * Funzione per generare lo stile di evidenziazione in base al tema
+ * Usata per evidenziare parti di testo nella trascrizione
+ */
 export const getHighlightStyle = (isDarkMode) => {
   return `background-color: ${isDarkMode ? 'rgba(240, 44, 86, 0.3)' : 'rgba(240, 44, 86, 0.15)'}; color: inherit; padding: 0 4px; border-radius: ${BORDERS.radius.xs}px;`;
 };
 
-// Stili per il componente TranscriptionView
+/**
+ * Stili per il componente TranscriptionView
+ * Organizzati per area funzionale
+ */
 const styles = {
   // Container principale
   container: { 
     width: '100%' 
   },
   
-  // Tabs container
+  /**
+   * Area Tabs e Navigazione
+   */
   tabsContainer: {
     borderBottom: 1, 
     borderColor: 'divider',
-    mb: { xs: 1, sm: 2 },
+    mb: { xs: SPACING.xs.xs, sm: SPACING.sm.xs },
     position: 'sticky',
     top: 0,
     zIndex: 1
   },
   
-  // Tabs
   tabs: {
     '& .MuiTab-root': {
       minHeight: { xs: 44, sm: 52 },
-      fontSize: { xs: '0.7rem', sm: '0.8rem' },
-      px: { xs: 1, sm: 2 },
+      fontSize: { xs: TYPOGRAPHY.fontSize.xs.xs, sm: TYPOGRAPHY.fontSize.xs.sm },
+      px: { xs: SPACING.xs.xs, sm: SPACING.sm.xs },
     }
   },
   
-  // Tab singola
   tab: {
     flexDirection: { xs: 'row', sm: 'column' },
-    gap: { xs: 1, sm: 0 },
+    gap: { xs: SPACING.xs.xs, sm: 0 },
     '& .MuiTab-iconWrapper': {
-      mr: { xs: 1, sm: 0 }
+      mr: { xs: SPACING.xs.xs, sm: 0 }
     }
   },
   
-  // Contenitore testo trascrizione
+  /**
+   * Area Trascrizione
+   */
   textContainer: { 
     position: 'relative',
-    mb: { xs: 2, sm: 3 }
+    mb: { xs: SPACING.sm.xs, sm: SPACING.md.xs }
   },
   
-  // Controlli trascrizione
   transcriptionControls: { 
     display: 'flex', 
     justifyContent: 'space-between',
     alignItems: 'center',
     flexWrap: 'wrap',
-    gap: 1,
-    mb: { xs: 1, sm: 2 }
+    gap: SPACING.xs.xs,
+    mb: { xs: SPACING.xs.xs, sm: SPACING.sm.xs }
   },
   
-  // Label switch
   switchLabel: { 
-    fontSize: { xs: '0.75rem', sm: '0.875rem' } 
+    fontSize: { xs: TYPOGRAPHY.fontSize.xs.xs, sm: TYPOGRAPHY.fontSize.xs.sm } 
   },
   
-  // Container pulsanti
   buttonsContainer: { 
     display: 'flex', 
-    gap: 1 
+    gap: SPACING.xs.xs 
   },
   
-  // Pulsante mobile
   mobileButton: { 
     display: { xs: 'flex', sm: 'none' } 
   },
   
-  // Pulsante desktop
   desktopButton: { 
+    ...BUTTON_STYLES.base,
     display: { xs: 'none', sm: 'flex' },
-    borderRadius: BORDERS.radius.xs,
-    fontSize: '0.85rem',
+    fontSize: TYPOGRAPHY.fontSize.xs.sm,
     py: 0.75
   },
   
-  // Textarea modifica
   textField: {
     '& .MuiOutlinedInput-root': {
-      fontSize: { xs: '0.875rem', sm: '1rem' },
-      lineHeight: { xs: 1.5, sm: 1.75 }
+      fontSize: { xs: TYPOGRAPHY.fontSize.sm.xs, sm: TYPOGRAPHY.fontSize.md.xs },
+      lineHeight: { xs: TYPOGRAPHY.lineHeight.tight, sm: TYPOGRAPHY.lineHeight.normal }
     }
   },
   
-  // Testo trascrizione
   transcriptionText: {
     whiteSpace: 'pre-wrap',
-    fontSize: { xs: '0.875rem', sm: '1rem' },
-    lineHeight: { xs: 1.5, sm: 1.75 },
+    fontSize: { xs: TYPOGRAPHY.fontSize.sm.xs, sm: TYPOGRAPHY.fontSize.md.xs },
+    lineHeight: { xs: TYPOGRAPHY.lineHeight.tight, sm: TYPOGRAPHY.lineHeight.normal },
     wordBreak: 'break-word'
   },
   
-  // Banner rianalisi
+  /**
+   * Area Banner e Azioni
+   */
   reanalysisBanner: {
-    mt: { xs: 2, sm: 3 },
-    p: { xs: 1.5, sm: 2 },
-    borderRadius: BORDERS.radius.xs,
+    mt: { xs: SPACING.sm.xs, sm: SPACING.md.xs },
+    p: { xs: 1.5, sm: SPACING.sm.xs },
+    borderRadius: BORDERS.radius.sm,
     display: 'flex',
     flexDirection: { xs: 'column', sm: 'row' },
     alignItems: { xs: 'stretch', sm: 'center' },
-    gap: { xs: 1, sm: 2 }
+    gap: { xs: SPACING.xs.xs, sm: SPACING.sm.xs }
   },
   
-  // Testo banner
   bannerText: { 
     flex: 1,
-    fontSize: { xs: '0.75rem', sm: '0.875rem' }
+    fontSize: { xs: TYPOGRAPHY.fontSize.xs.xs, sm: TYPOGRAPHY.fontSize.sm.xs }
   },
   
-  // Container pulsanti banner
   bannerButtons: { 
     display: 'flex', 
-    gap: 1,
+    gap: SPACING.xs.xs,
     justifyContent: { xs: 'flex-end', sm: 'flex-start' }
   },
   
-  // Pulsante banner
   bannerButton: { 
-    borderRadius: BORDERS.radius.xs,
-    fontSize: '0.85rem',
+    ...BUTTON_STYLES.base,
+    fontSize: TYPOGRAPHY.fontSize.xs.sm,
     py: 0.75
   },
   
-  // Container caricamento
+  /**
+   * Area Stati (Loading, Error, ecc.)
+   */
   loadingContainer: { 
     display: 'flex', 
     flexDirection: 'column', 
     alignItems: 'center', 
-    gap: 2,
-    p: { xs: 2, sm: 3 }
+    gap: SPACING.sm.xs,
+    p: { xs: SPACING.sm.xs, sm: SPACING.md.xs }
   },
   
-  // Testo caricamento
   loadingText: { 
-    fontSize: { xs: '0.75rem', sm: '0.875rem' } 
+    fontSize: { xs: TYPOGRAPHY.fontSize.xs.xs, sm: TYPOGRAPHY.fontSize.sm.xs } 
   },
   
-  // Container errore
   errorContainer: { 
     textAlign: 'center', 
-    p: { xs: 2, sm: 3 }
+    p: { xs: SPACING.sm.xs, sm: SPACING.md.xs }
   },
   
-  // Testo errore
   errorText: { 
-    fontSize: { xs: '0.875rem', sm: '1rem' } 
+    fontSize: { xs: TYPOGRAPHY.fontSize.sm.xs, sm: TYPOGRAPHY.fontSize.md.xs } 
   },
   
-  // Pulsante retry
-  retryButton: { 
-    mt: { xs: 1, sm: 2 },
-    borderRadius: BORDERS.radius.xs,
-    fontSize: '0.85rem',
+  retryButton: {
+    ...BUTTON_STYLES.base, 
+    mt: { xs: SPACING.xs.xs, sm: SPACING.sm.xs },
+    fontSize: TYPOGRAPHY.fontSize.xs.sm,
     py: 0.75
   },
   
-  // Container analisi
+  /**
+   * Area Analisi
+   */
   analyzeContainer: { 
     display: 'flex', 
     flexDirection: 'column', 
     alignItems: 'center',
-    gap: 2,
-    p: { xs: 2, sm: 3 }
+    gap: SPACING.sm.xs,
+    p: { xs: SPACING.sm.xs, sm: SPACING.md.xs }
   },
   
-  // Pulsante analizza
   analyzeButton: { 
-    borderRadius: BORDERS.radius.xs,
-    backgroundColor: COLORS.neutral.lightGray,
-    color: COLORS.neutral.black,
-    boxShadow: SHADOWS.sm,
-    transition: 'all 0.2s ease-in-out',
-    fontSize: '0.85rem',
+    ...BUTTON_STYLES.base,
+    ...BUTTON_STYLES.filled,
+    fontSize: TYPOGRAPHY.fontSize.xs.sm,
     py: 0.75,
     '&:hover': {
-      backgroundColor: COLORS.neutral.mediumGray,
-      boxShadow: SHADOWS.md,
-      transform: 'translateY(-1px)'
+      ...BUTTON_STYLES.filled['&:hover'],
+      transform: BUTTON_STYLES.base['&:hover'].transform
     }
   }
 };

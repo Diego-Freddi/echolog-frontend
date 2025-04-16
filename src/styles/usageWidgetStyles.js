@@ -3,7 +3,15 @@ import {
   TYPOGRAPHY, GRADIENTS, CARD_STYLES 
 } from './themes';
 
-// Palette colori per il grafico
+/**
+ * Stili centralizzati per il widget di utilizzo dell'applicazione EchoLog
+ * Visualizza l'utilizzo dei crediti, servizi e giorni rimanenti
+ */
+
+/**
+ * Palette colori per il grafico a torta
+ * Colori coordinati con il design system dell'applicazione
+ */
 export const CHART_COLORS = [
   COLORS.primary.main, 
   COLORS.secondary.main, 
@@ -15,9 +23,12 @@ export const CHART_COLORS = [
   '#4b7bec'
 ];
 
-// Stili base componente
+/**
+ * Stili base del componente
+ * Layout e formattazione generale del widget
+ */
 export const styles = {
-  // Stili container principale
+  // Container principale
   container: {
     p: SPACING.md.xs, 
     borderRadius: BORDERS.radius.md, 
@@ -25,7 +36,7 @@ export const styles = {
     mb: SPACING.md.xs
   },
   
-  // Stili card comuni
+  // Card comuni
   card: {
     ...CARD_STYLES.base,
     borderRadius: BORDERS.radius.sm,
@@ -41,7 +52,7 @@ export const styles = {
   // Box per elementi in lista
   itemBox: {
     p: SPACING.sm.xs,
-    borderRadius: BORDERS.radius.xs,
+    borderRadius: BORDERS.radius.sm,
     bgcolor: 'rgba(0,0,0,0.02)',
     display: 'flex',
     alignItems: 'center',
@@ -66,11 +77,14 @@ export const styles = {
     background: { xs: GRADIENTS.navbar, sm: 'none' },
     WebkitBackgroundClip: { xs: 'text', sm: 'none' },
     WebkitTextFillColor: { xs: 'transparent', sm: 'inherit' },
-    p: { xs: 1, sm: 0 }
+    p: { xs: SPACING.xs.xs, sm: 0 }
   }
 };
 
-// Stili per componenti specifici
+/**
+ * Indicatore di caricamento
+ * Stili per la visualizzazione durante il caricamento dei dati
+ */
 export const loadingSpinnerStyles = {
   container: { 
     display: 'flex', 
@@ -82,6 +96,10 @@ export const loadingSpinnerStyles = {
   }
 };
 
+/**
+ * Card Crediti
+ * Visualizza i crediti disponibili e i giorni rimanenti
+ */
 export const creditCardStyles = {
   creditAmount: {
     fontWeight: TYPOGRAPHY.fontWeights.bold,
@@ -98,8 +116,8 @@ export const creditCardStyles = {
   
   progressBar: {
     height: { xs: 12, sm: 10 },
-    borderRadius: BORDERS.radius.md,
-    mb: 1,
+    borderRadius: BORDERS.radius.sm,
+    mb: SPACING.xs.xs,
     bgcolor: 'rgba(240, 44, 86, 0.1)',
     '& .MuiLinearProgress-bar': {
       background: GRADIENTS.primary
@@ -115,6 +133,10 @@ export const creditCardStyles = {
   }
 };
 
+/**
+ * Grafico Servizi
+ * Visualizza la distribuzione dei costi per servizio
+ */
 export const serviceChartStyles = {
   container: {
     height: 350,
@@ -129,29 +151,33 @@ export const serviceChartStyles = {
     alignItems: 'center',
     height: 300,
     bgcolor: 'rgba(0,0,0,0.02)',
-    borderRadius: BORDERS.radius.xs,
+    borderRadius: BORDERS.radius.sm,
     p: SPACING.md.xs
   },
   
   percentageLabel: {
     fill: "#333333",
-    fontWeight: "bold",
+    fontWeight: TYPOGRAPHY.fontWeights.bold,
     fontSize: "14"
   },
   
   tooltipStyle: {
-    borderRadius: BORDERS.radius.lg,
+    borderRadius: BORDERS.radius.md,
     boxShadow: SHADOWS.md,
     border: 'none'
   }
 };
 
+/**
+ * Dettagli Servizi
+ * Mostra il dettaglio dei costi per ciascun servizio
+ */
 export const serviceDetailStyles = {
   container: {
     flex: 1, 
     display: 'flex', 
     flexDirection: 'column',
-    p: { xs: 2.5, sm: SPACING.sm.sm }
+    p: { xs: SPACING.md.xs, sm: SPACING.sm.sm }
   },
   
   list: {
@@ -161,32 +187,32 @@ export const serviceDetailStyles = {
   },
   
   itemBox: {
-    p: { xs: 2, sm: 1.5 },
-    borderRadius: { xs: BORDERS.radius.sm, sm: BORDERS.radius.xs }
+    p: { xs: SPACING.sm.xs, sm: SPACING.sm.xs },
+    borderRadius: { xs: BORDERS.radius.sm, sm: BORDERS.radius.sm }
   },
   
   colorDot: {
     width: { xs: 14, sm: 12 },
     height: { xs: 14, sm: 12 },
     borderRadius: BORDERS.radius.round,
-    mr: 1.5,
+    mr: SPACING.xs.sm,
     flexShrink: 0
   },
   
   serviceName: {
     fontWeight: TYPOGRAPHY.fontWeights.medium,
-    fontSize: { xs: '0.9rem', sm: 'inherit' }
+    fontSize: { xs: TYPOGRAPHY.fontSize.sm.sm, sm: 'inherit' }
   },
   
   serviceCost: {
     fontWeight: TYPOGRAPHY.fontWeights.semibold, 
-    ml: 1,
-    fontSize: { xs: '0.9rem', sm: 'inherit' }
+    ml: SPACING.xs.xs,
+    fontSize: { xs: TYPOGRAPHY.fontSize.sm.sm, sm: 'inherit' }
   },
   
   noDataBox: {
     p: SPACING.md.xs,
-    borderRadius: BORDERS.radius.xs,
+    borderRadius: BORDERS.radius.sm,
     bgcolor: 'rgba(0,0,0,0.02)',
     display: 'flex',
     justifyContent: 'center',

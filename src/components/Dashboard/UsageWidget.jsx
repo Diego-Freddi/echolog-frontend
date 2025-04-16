@@ -2,11 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Box, Typography, CircularProgress, Paper, 
   Divider, Chip, LinearProgress, Grid,
-  Card, CardContent, Stack, Button
+  Card, CardContent, Stack
 } from '@mui/material';
 import { 
   PieChart, Pie, Cell, ResponsiveContainer, 
-  Tooltip, Legend
+  Tooltip
 } from 'recharts';
 import { dashboardService } from '../../services/api';
 import { COLORS } from '../../styles/themes';

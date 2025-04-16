@@ -8,33 +8,46 @@ import {
   TYPOGRAPHY
 } from './themes';
 
+/**
+ * Stili centralizzati per il componente AudioRecorder
+ * Estende correttamente gli stili base da themes.js
+ */
+
 // Animazione di pulsazione per il microfono attivo
 export const pulse = ANIMATIONS.pulse;
 
-// Stili per i bottoni con design Apple-Like
+/**
+ * Stili per i bottoni con design Apple-Like
+ * Estende correttamente BUTTON_STYLES
+ */
 export const buttonStyles = {
+  // Stile di base che estende gli stili predefiniti dei bottoni
   base: {
     ...BUTTON_STYLES.base,
     ...BUTTON_STYLES.filled,
-    borderRadius: BORDERS.radius.sm,
     fontSize: { xs: '0.8rem', sm: '0.85rem' },
     py: { xs: 0.6, sm: 0.8 },
     px: { xs: 1.8, sm: 2.5 },
     minWidth: { xs: '45%', sm: 'auto' }
   },
+  // Estende la funzione di selezione tab
   selected: BUTTON_STYLES.tabSelected,
+  // Stile per selettore di sorgente
   sourceSelector: {
-    borderRadius: BORDERS.radius.sm,
-    transition: 'all 0.2s ease-in-out',
+    ...BUTTON_STYLES.base,
     fontSize: { xs: '0.75rem', sm: '0.8rem' },
     py: { xs: 0.4, sm: 0.8 },
     px: { xs: 1.2, sm: 1.8 },
     minWidth: { xs: '45%', sm: 'auto' }
   },
+  // Estende lo stile per bottoni disabilitati
   disabled: BUTTON_STYLES.disabled
 };
 
-// Stili per il container onde audio
+/**
+ * Stili per il container onde audio
+ * Contiene le barre di visualizzazione dell'audio
+ */
 export const audioWaveContainerStyles = {
   display: 'flex',
   alignItems: 'flex-end',
@@ -45,7 +58,10 @@ export const audioWaveContainerStyles = {
   gap: { xs: 2, sm: 3 }
 };
 
-// Stili per il componente onde audio
+/**
+ * Stili per il componente onde audio
+ * Gestisce l'aspetto visivo delle barre audio
+ */
 export const audioWaveStyles = {
   barContainer: {
     position: 'relative',
@@ -62,14 +78,17 @@ export const audioWaveStyles = {
   })
 };
 
-// Stili per il player audio
+/**
+ * Stili per il player audio
+ * Personalizza l'aspetto dell'elemento audio HTML5
+ */
 export const audioPlayerStyles = {
   width: '100%',
-  borderRadius: BORDERS.radius.lg,
+  borderRadius: BORDERS.radius.md, // Aggiornato da lg a md per coerenza
   height: { xs: 32, sm: 40 },
   '&::-webkit-media-controls-panel': {
     backgroundColor: COLORS.neutral.lightGray,
-    borderRadius: BORDERS.radius.lg,
+    borderRadius: BORDERS.radius.md, // Aggiornato da lg a md per coerenza
     p: { xs: 0.5, sm: 1 }
   },
   '&::-webkit-media-controls-play-button': {
@@ -84,7 +103,10 @@ export const audioPlayerStyles = {
   }
 };
 
-// Stili per il timer
+/**
+ * Stili per il timer
+ * Visualizza il tempo trascorso durante la registrazione
+ */
 export const timerStyles = {
   display: 'flex',
   alignItems: 'center',
@@ -98,7 +120,10 @@ export const timerStyles = {
   }
 };
 
-// Stili per indicatori e messaggi
+/**
+ * Stili per indicatori e messaggi di stato
+ * Visualizza lo stato corrente della registrazione
+ */
 export const statusIndicatorStyles = {
   container: {
     display: 'flex',
@@ -109,4 +134,14 @@ export const statusIndicatorStyles = {
   text: {
     fontSize: TYPOGRAPHY.fontSize.xs
   }
+};
+
+export default {
+  pulse,
+  buttonStyles,
+  audioWaveContainerStyles,
+  audioWaveStyles,
+  audioPlayerStyles,
+  timerStyles,
+  statusIndicatorStyles
 }; 

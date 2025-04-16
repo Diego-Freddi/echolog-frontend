@@ -7,14 +7,19 @@ import {
   TYPOGRAPHY,
   BUTTON_STYLES,
   CHIP_STYLES,
-  CONTAINER_STYLES
+  CONTAINER_STYLES,
+  SPACING
 } from './themes';
 
 /**
  * Stili centralizzati per la pagina History dell'applicazione EchoLog
+ * Estende correttamente gli stili base di themes.js
  */
 
-// Stili per le tab e gli indicatori
+/**
+ * Tabs e Navigazione
+ * Stili per i tabs e gli indicatori di selezione
+ */
 export const tabStyles = {
   container: {
     borderBottom: 1, 
@@ -22,13 +27,13 @@ export const tabStyles = {
     '& .MuiTabs-flexContainer': {
       justifyContent: 'center',
     },
-    mb: 3
+    mb: SPACING.md.xs
   },
   tabs: {
     '& .MuiTab-root': {
       textTransform: 'none',
       fontWeight: TYPOGRAPHY.fontWeights.medium,
-      fontSize: '1rem',
+      fontSize: TYPOGRAPHY.fontSize.md.xs,
       minWidth: 120,
     },
     '& .Mui-selected': {
@@ -43,22 +48,26 @@ export const tabStyles = {
   }
 };
 
-// Stili per la card statistica
+/**
+ * Card Statistiche
+ * Stili per le card che visualizzano dati statistici
+ */
 export const statCardStyles = {
   card: {
+    ...CARD_STYLES.base,
     height: '100%',
   },
   content: { 
-    p: 3 
+    p: SPACING.md.xs 
   },
   header: { 
     display: 'flex', 
     alignItems: 'center', 
-    mb: 2 
+    mb: SPACING.sm.xs 
   },
   icon: (color) => ({ 
     color: color || COLORS.primary.main, 
-    mr: 1 
+    mr: SPACING.xs.xs 
   }),
   title: {
     fontWeight: TYPOGRAPHY.fontWeights.semibold
@@ -68,10 +77,13 @@ export const statCardStyles = {
   }
 };
 
-// Stili per la tabella cronologia
+/**
+ * Tabella Cronologia
+ * Stili per la visualizzazione tabulare delle registrazioni
+ */
 export const historyTableStyles = {
   container: { 
-    mb: 3, 
+    mb: SPACING.md.xs, 
     p: 0, 
     overflow: { xs: 'auto', sm: 'hidden' },
     borderRadius: BORDERS.radius.md
@@ -99,31 +111,34 @@ export const historyTableStyles = {
   },
   cellIcon: (color) => ({ 
     color: color || COLORS.secondary.main, 
-    mr: 1, 
+    mr: SPACING.xs.xs, 
     fontSize: { xs: 16, sm: 20 } 
   }),
   keywordsContainer: { 
     display: 'flex', 
     flexWrap: 'wrap', 
-    gap: 0.5, 
+    gap: SPACING.xs.xs, 
     maxWidth: 280 
   },
   keywordChip: { 
+    ...CHIP_STYLES.base,
     bgcolor: 'rgba(240, 44, 86, 0.1)', 
-    fontSize: '0.75rem',
+    fontSize: TYPOGRAPHY.fontSize.xs.xs,
     height: 24,
-    borderRadius: BORDERS.radius.xl
+    borderRadius: BORDERS.radius.md // Standardizzato da xl a md
   },
   additionalKeywordsChip: { 
+    ...CHIP_STYLES.base,
     bgcolor: 'rgba(124, 50, 255, 0.1)', 
-    fontSize: '0.75rem',
+    fontSize: TYPOGRAPHY.fontSize.xs.xs,
     height: 24,
-    borderRadius: BORDERS.radius.xl
+    borderRadius: BORDERS.radius.md // Standardizzato da xl a md
   },
   audioStatusChip: (available) => ({
+    ...CHIP_STYLES.base,
     height: 24, 
-    fontSize: '0.75rem', 
-    borderRadius: BORDERS.radius.xl,
+    fontSize: TYPOGRAPHY.fontSize.xs.xs, 
+    borderRadius: BORDERS.radius.md, // Standardizzato da xl a md
     color: available ? COLORS.state.success : COLORS.state.error,
     borderColor: available ? COLORS.state.success : COLORS.state.error
   }),
@@ -132,86 +147,98 @@ export const historyTableStyles = {
   }
 };
 
-// Stili per azioni e pulsanti
+/**
+ * Azioni e Pulsanti
+ * Stili per i pulsanti di azione nella tabella e nell'interfaccia
+ */
 export const actionStyles = {
   viewButton: { 
+    ...BUTTON_STYLES.base,
     color: COLORS.accent.blue,
     '&:hover': {
+      ...BUTTON_STYLES.base['&:hover'],
       backgroundColor: 'rgba(53, 160, 238, 0.1)'
     }
   },
   downloadButton: { 
+    ...BUTTON_STYLES.base,
     color: COLORS.secondary.main,
     display: { xs: 'none', sm: 'inline-flex' },
     '&:hover': {
+      ...BUTTON_STYLES.base['&:hover'],
       backgroundColor: 'rgba(124, 50, 255, 0.1)'
     }
   },
   deleteButton: { 
+    ...BUTTON_STYLES.base,
     color: COLORS.primary.main,
     '&:hover': {
+      ...BUTTON_STYLES.base['&:hover'],
       backgroundColor: 'rgba(240, 44, 86, 0.1)'
     }
   },
   gradientButton: {
-    mt: 2,
-    borderRadius: BORDERS.radius.xl,
-    background: GRADIENTS.primary,
+    ...BUTTON_STYLES.base,
+    ...BUTTON_STYLES.primary,
+    mt: SPACING.sm.xs,
+    borderRadius: BORDERS.radius.md, // Standardizzato da xl a md
     textTransform: 'none',
-    px: 3,
-    py: 1,
-    fontWeight: TYPOGRAPHY.fontWeights.medium,
-    '&:hover': {
-      background: GRADIENTS.primaryHover,
-      boxShadow: SHADOWS.primarySm
-    }
+    px: SPACING.md.xs,
+    py: SPACING.xs.xs,
+    fontWeight: TYPOGRAPHY.fontWeights.medium
   }
 };
 
-// Stili per dialogo conferma
+/**
+ * Dialogo di Conferma
+ * Stili per i dialoghi di conferma delle azioni
+ */
 export const confirmDialogStyles = {
   paper: {
-    borderRadius: BORDERS.radius.xl,
-    padding: '8px',
+    borderRadius: BORDERS.radius.md, // Standardizzato da xl a md
+    padding: SPACING.xs.xs,
     boxShadow: SHADOWS.xl,
   },
   title: { 
     fontWeight: TYPOGRAPHY.fontWeights.semibold 
   },
   actions: { 
-    padding: '16px' 
+    padding: SPACING.sm.xs 
   },
   cancelButton: {
-    borderRadius: BORDERS.radius.xl,
+    ...BUTTON_STYLES.base,
+    borderRadius: BORDERS.radius.md, // Standardizzato da xl a md
     textTransform: 'none',
     borderColor: COLORS.primary.main,
     color: COLORS.primary.main,
     '&:hover': {
+      ...BUTTON_STYLES.base['&:hover'],
       borderColor: COLORS.primary.main,
       backgroundColor: 'rgba(240, 44, 86, 0.05)'
     }
   },
   confirmButton: {
-    borderRadius: BORDERS.radius.xl,
-    textTransform: 'none',
-    backgroundColor: COLORS.primary.main,
-    '&:hover': {
-      backgroundColor: COLORS.primary.dark
-    }
+    ...BUTTON_STYLES.base,
+    ...BUTTON_STYLES.primary,
+    borderRadius: BORDERS.radius.md, // Standardizzato da xl a md
+    textTransform: 'none'
   }
 };
 
-// Stili per la paginazione
+/**
+ * Paginazione
+ * Stili per la paginazione della tabella
+ */
 export const paginationStyles = {
   container: { 
     display: 'flex', 
     justifyContent: 'center', 
-    mt: 3 
+    mt: SPACING.md.xs 
   },
   pagination: {
     '& .MuiPaginationItem-root': {
-      borderRadius: BORDERS.radius.xl,
-      margin: '0 4px'
+      borderRadius: BORDERS.radius.md, // Standardizzato da xl a md
+      margin: `0 ${SPACING.xs.xs}px`
     },
     '& .Mui-selected': {
       background: 'linear-gradient(90deg, rgba(240, 44, 86, 0.1) 0%, rgba(124, 50, 255, 0.1) 100%)',
@@ -224,16 +251,19 @@ export const paginationStyles = {
   }
 };
 
-// Stili per la visualizzazione vuota
+/**
+ * Stato Vuoto
+ * Stili per la visualizzazione quando non ci sono dati
+ */
 export const emptyStateStyles = {
   container: { 
     textAlign: 'center', 
-    py: 6 
+    py: SPACING.xl.sm
   },
   icon: { 
     fontSize: 60, 
     color: 'text.secondary', 
-    mb: 2 
+    mb: SPACING.sm.xs 
   }
 };
 
