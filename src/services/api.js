@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 // Configura l'istanza base di Axios
-const API_URL = 'http://localhost:5050/api';
+const API_URL = process.env.REACT_APP_BACKEND_URL
+  ? `${process.env.REACT_APP_BACKEND_URL}/api`
+  : 'http://localhost:5050/api';
 
 const api = axios.create({
   baseURL: API_URL,
