@@ -2,63 +2,28 @@ import React, { useState, useRef } from 'react';
 import { 
   Box, 
   Typography, 
-  Paper, 
   Button, 
   TextField, 
   CircularProgress,
   Alert,
-  useTheme,
-  styled
+  useTheme
 } from '@mui/material';
 import {
-  Upload as UploadIcon,
-  Description as DescriptionIcon,
   TextFields as TextFieldsIcon,
   Psychology as PsychologyIcon,
-  Delete as DeleteIcon,
+  Upload as UploadIcon
 } from '@mui/icons-material';
 import PageContainer from '../components/layout/PageContainer';
 import TranscriptionView from '../components/transcription/TranscriptionView';
+import DropZone from '../components/upload/DropZone';
 import { transcriptionService } from '../services/api';
-
-// Paper stilizzato
-const ApplePaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(2),
-  },
-  borderRadius: 16,
-  backgroundColor: theme.palette.mode === 'dark' ? '#1c1c1e' : '#ffffff',
-  boxShadow: '0px 10px 38px -10px rgba(0, 0, 0, 0.1), 0px 10px 20px -15px rgba(0, 0, 0, 0.05)',
-  backdropFilter: 'blur(10px)',
-  overflow: 'hidden',
-  position: 'relative',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '4px',
-    background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)',
-  }
-}));
-
-// Styling per la zona di drag & drop
-const DropZone = styled(Box)(({ theme, isDragActive, hasFile }) => ({
-  border: `2px dashed ${isDragActive ? theme.palette.primary.main : hasFile ? theme.palette.success.main : '#ccc'}`,
-  borderRadius: theme.shape.borderRadius * 2,
-  padding: theme.spacing(4),
-  textAlign: 'center',
-  backgroundColor: isDragActive ? 'rgba(240, 44, 86, 0.08)' : hasFile ? 'rgba(76, 175, 80, 0.08)' : theme.palette.background.paper,
-  cursor: 'pointer',
-  transition: 'all 0.3s ease',
-  marginBottom: theme.spacing(3),
-  '&:hover': {
-    backgroundColor: isDragActive ? 'rgba(240, 44, 86, 0.12)' : hasFile ? 'rgba(76, 175, 80, 0.12)' : theme.palette.background.hover,
-    borderColor: isDragActive ? theme.palette.primary.main : hasFile ? theme.palette.success.main : theme.palette.primary.light
-  }
-}));
+import { ApplePaper, containerStyles, pageTitleStyles, pageSubtitleStyles } from '../styles/pageStyles';
+import { 
+  tabSelectorStyles, 
+  processButtonStyles, 
+  textInputStyles,
+  resultHeaderStyles
+} from '../styles/textAnalyzerStyles';
 
 const TextAnalyzer = () => {
   const theme = useTheme();
@@ -215,6 +180,22 @@ const TextAnalyzer = () => {
     }));
   };
 
+  // Funzione per tornare alla modalità di input
+  const handleNewAnalysis = () => {
+    setShowTranscriptionView(false);
+    setTranscriptionData({
+      text: '',
+      transcriptionId: null,
+      recordingId: null
+    });
+    setFile(null);
+    setDirectText('');
+    setTabValue(0);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   if (showTranscriptionView) {
     return (
       <PageContainer>
@@ -225,50 +206,16 @@ const TextAnalyzer = () => {
           p: { xs: 1, sm: 2, md: 3 }
         }}>
           <ApplePaper>
-            <Box sx={{ 
-              display: 'flex', 
-              justifyContent: 'space-between', 
-              alignItems: 'center', 
-              mb: 3,
-              pb: 2,
-              borderBottom: '1px solid rgba(0,0,0,0.06)'
-            }}>
-              <Typography variant="h6" sx={{ 
-                color: theme.palette.primary.main,
-                fontWeight: 600
-              }}>
+            <Box sx={resultHeaderStyles.container}>
+              <Typography variant="h6" sx={resultHeaderStyles.title}>
                 {file ? file.name : 'Testo analizzato'}
               </Typography>
               
               <Button
                 variant="outlined"
                 size="small"
-                onClick={() => {
-                  setShowTranscriptionView(false);
-                  setTranscriptionData({
-                    text: '',
-                    transcriptionId: null,
-                    recordingId: null
-                  });
-                  setFile(null);
-                  setDirectText('');
-                  setTabValue(0);
-                  if (fileInputRef.current) {
-                    fileInputRef.current.value = '';
-                  }
-                }}
-                sx={{
-                  borderRadius: '12px',
-                  borderColor: theme.palette.primary.main,
-                  color: theme.palette.primary.main,
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  '&:hover': {
-                    backgroundColor: 'rgba(240,44,86,0.04)',
-                    borderColor: theme.palette.primary.main,
-                    transform: 'translateY(-1px)'
-                  }
-                }}
+                onClick={handleNewAnalysis}
+                sx={resultHeaderStyles.newAnalysisButton}
               >
                 Nuova Analisi
               </Button>
@@ -287,25 +234,12 @@ const TextAnalyzer = () => {
 
   return (
     <PageContainer>
-      <Box sx={{
-        width: { xs: '100%', md: '90%', lg: '800px' },
-        maxWidth: '1200px',
-        mx: 'auto',
-        p: { xs: 2, md: 3 },
-      }}>
+      <Box sx={containerStyles}>
         <ApplePaper>
           <Typography 
             variant="h4" 
             gutterBottom 
-            sx={{ 
-              fontWeight: 600, 
-              fontSize: '1.75rem',
-              background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 2,
-              textAlign: 'center'
-            }}
+            sx={pageTitleStyles}
           >
             Text Analyzer
           </Typography>
@@ -313,44 +247,17 @@ const TextAnalyzer = () => {
           <Typography 
             variant="subtitle1" 
             color="text.secondary" 
-            sx={{ 
-              mb: 4, 
-              textAlign: 'center' 
-            }}
+            sx={pageSubtitleStyles}
           >
             Analizza testo da file o input diretto senza registrazione audio
           </Typography>
 
-          <Box sx={{ 
-            display: 'flex', 
-            backgroundColor: theme.palette.background.default,
-            borderRadius: 4,
-            padding: 1,
-            justifyContent: 'center',
-            mb: 4,
-            mx: 'auto',
-            maxWidth: 'fit-content'
-          }}>
+          <Box sx={tabSelectorStyles.container}>
             <Button
               variant={tabValue === 0 ? 'contained' : 'text'}
               onClick={() => handleTabChange(null, 0)}
               startIcon={<UploadIcon />}
-              sx={{ 
-                borderRadius: 2,
-                backgroundColor: tabValue === 0 ? theme.palette.background.paper : 'transparent',
-                color: tabValue === 0 ? theme.palette.text.primary : theme.palette.text.secondary,
-                boxShadow: tabValue === 0 ? theme.shadows[1] : 'none',
-                transition: 'all 0.2s ease-in-out',
-                px: 3,
-                py: 1,
-                textTransform: 'uppercase',
-                fontWeight: 500,
-                '&:hover': {
-                  backgroundColor: tabValue === 0 ? theme.palette.background.paper : theme.palette.action.hover,
-                  boxShadow: tabValue === 0 ? theme.shadows[2] : 'none',
-                  transform: 'translateY(-1px)'
-                }
-              }}
+              sx={tabSelectorStyles.button(tabValue === 0, theme)}
             >
               Carica File
             </Button>
@@ -358,22 +265,7 @@ const TextAnalyzer = () => {
               variant={tabValue === 1 ? 'contained' : 'text'}
               onClick={() => handleTabChange(null, 1)}
               startIcon={<TextFieldsIcon />}
-              sx={{ 
-                borderRadius: 2,
-                backgroundColor: tabValue === 1 ? theme.palette.background.paper : 'transparent',
-                color: tabValue === 1 ? theme.palette.text.primary : theme.palette.text.secondary,
-                boxShadow: tabValue === 1 ? theme.shadows[1] : 'none',
-                transition: 'all 0.2s ease-in-out',
-                px: 3,
-                py: 1,
-                textTransform: 'uppercase',
-                fontWeight: 500,
-                '&:hover': {
-                  backgroundColor: tabValue === 1 ? theme.palette.background.paper : theme.palette.action.hover,
-                  boxShadow: tabValue === 1 ? theme.shadows[2] : 'none',
-                  transform: 'translateY(-1px)'
-                }
-              }}
+              sx={tabSelectorStyles.button(tabValue === 1, theme)}
             >
               Input Diretto
             </Button>
@@ -417,74 +309,20 @@ const TextAnalyzer = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={handleFileClick}
+                file={file}
+                onRemoveFile={handleRemoveFile}
                 isDragActive={isDragActive}
-                hasFile={!!file}
-              >
-                {file ? (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <DescriptionIcon color="success" sx={{ fontSize: 48, mb: 2 }} />
-                    <Typography variant="body1" gutterBottom fontWeight={500}>
-                      {file.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {(file.size / 1024).toFixed(2)} KB
-                    </Typography>
-                    
-                    <Box sx={{ mt: 2, display: 'flex', gap: 2 }}>
-                      <Button
-                        size="small"
-                        startIcon={<DeleteIcon />}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveFile();
-                        }}
-                        color="error"
-                        variant="outlined"
-                        sx={{ borderRadius: '12px' }}
-                      >
-                        Rimuovi
-                      </Button>
-                    </Box>
-                  </Box>
-                ) : (
-                  <Box>
-                    <UploadIcon sx={{ fontSize: 48, color: '#ccc', mb: 2 }} />
-                    <Typography variant="body1" gutterBottom fontWeight={500}>
-                      Trascina qui un file o fai click per selezionarlo
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Dimensione massima: 10MB
-                    </Typography>
-                  </Box>
-                )}
-              </DropZone>
+                acceptedFormats="Dimensione massima: 10MB"
+              />
               
-              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Box sx={processButtonStyles.container}>
                 <Button
                   variant="contained"
                   size="large"
                   disabled={!file || fileProcessing}
                   onClick={handleProcessFile}
                   startIcon={fileProcessing ? <CircularProgress size={20} color="inherit" /> : <PsychologyIcon />}
-                  sx={{
-                    px: 4,
-                    py: 1.5,
-                    borderRadius: '12px',
-                    background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)',
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                    fontWeight: 500,
-                    boxShadow: '0 4px 12px rgba(240,44,86,0.2)',
-                    '&:hover': {
-                      background: 'linear-gradient(90deg, #e02951 0%, #6c2be0 100%)',
-                      boxShadow: '0 6px 16px rgba(240,44,86,0.3)',
-                      transform: 'translateY(-2px)'
-                    },
-                    '&:disabled': {
-                      background: '#e0e0e0',
-                      color: '#a0a0a0'
-                    }
-                  }}
+                  sx={processButtonStyles.button}
                 >
                   {fileProcessing ? 'Elaborazione in corso...' : 'Estrai e Analizza'}
                 </Button>
@@ -515,47 +353,17 @@ const TextAnalyzer = () => {
                 placeholder="Inserisci qui il testo da analizzare..."
                 minRows={10}
                 maxRows={15}
-                sx={{
-                  mb: 3,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover .MuiOutlinedInput-notchedOutline': {
-                      borderColor: theme.palette.primary.main,
-                    },
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: theme.palette.primary.main,
-                      borderWidth: 1,
-                    }
-                  }
-                }}
+                sx={textInputStyles.textField}
               />
               
-              <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <Box sx={processButtonStyles.container}>
                 <Button
                   variant="contained"
                   size="large"
                   disabled={!directText.trim() || textProcessing}
                   onClick={handleProcessText}
                   startIcon={textProcessing ? <CircularProgress size={20} color="inherit" /> : <PsychologyIcon />}
-                  sx={{
-                    px: 4,
-                    py: 1.5,
-                    borderRadius: '12px',
-                    background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)',
-                    textTransform: 'none',
-                    fontSize: '1rem',
-                    fontWeight: 500,
-                    boxShadow: '0 4px 12px rgba(240,44,86,0.2)',
-                    '&:hover': {
-                      background: 'linear-gradient(90deg, #e02951 0%, #6c2be0 100%)',
-                      boxShadow: '0 6px 16px rgba(240,44,86,0.3)',
-                      transform: 'translateY(-2px)'
-                    },
-                    '&:disabled': {
-                      background: '#e0e0e0',
-                      color: '#a0a0a0'
-                    }
-                  }}
+                  sx={processButtonStyles.button}
                 >
                   {textProcessing ? 'Elaborazione in corso...' : 'Analizza Testo'}
                 </Button>

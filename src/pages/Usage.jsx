@@ -2,37 +2,18 @@ import React from 'react';
 import { Box, Typography, Grid, Paper } from '@mui/material';
 import PageContainer from '../components/layout/PageContainer';
 import UsageWidget from '../components/Dashboard/UsageWidget';
+import { ApplePaper, containerStyles, pageTitleStyles, pageSubtitleStyles } from '../styles/pageStyles';
 
 const Usage = () => {
   return (
     <PageContainer>
-      <Box sx={{ 
-        width: { xs: '100%', md: '90%', lg: '80%' },
-        maxWidth: '1200px',
-        mx: 'auto',
-        p: { xs: 2, md: 3 },
-      }}>
-        <Paper sx={{ 
-          p: 4, 
-          borderRadius: '16px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-          border: '1px solid rgba(240,44,86,0.1)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
+      <Box sx={containerStyles}>
+        <ApplePaper>
           <Typography 
             variant="h4" 
             component="h1" 
             gutterBottom 
-            sx={{ 
-              fontWeight: 600,
-              fontSize: '1.75rem',
-              background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              mb: 2,
-              textAlign: 'center'
-            }}
+            sx={pageTitleStyles}
           >
             Monitoraggio Consumi
           </Typography>
@@ -40,10 +21,7 @@ const Usage = () => {
           <Typography 
             variant="subtitle1" 
             color="text.secondary" 
-            sx={{ 
-              mb: 4, 
-              textAlign: 'center' 
-            }}
+            sx={pageSubtitleStyles}
           >
             Monitora l'utilizzo delle API Google Cloud e i relativi costi
           </Typography>
@@ -91,7 +69,7 @@ const Usage = () => {
               </Paper>
             </Grid>
           </Grid>
-        </Paper>
+        </ApplePaper>
       </Box>
     </PageContainer>
   );

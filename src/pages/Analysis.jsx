@@ -1,31 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, CircularProgress, Alert, IconButton, Paper } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert, IconButton } from '@mui/material';
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { analysisService } from '../services/api';
 import PageContainer from '../components/layout/PageContainer';
 import AnalysisView from '../components/analysis/AnalysisView';
-import { styled } from '@mui/material/styles';
-
-// Paper stilizzato in stile Apple
-const ApplePaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(4),
-  borderRadius: 16,
-  backgroundColor: theme.palette.mode === 'dark' ? '#1c1c1e' : '#ffffff',
-  boxShadow: '0px 10px 38px -10px rgba(0, 0, 0, 0.1), 0px 10px 20px -15px rgba(0, 0, 0, 0.05)',
-  backdropFilter: 'blur(10px)',
-  overflow: 'hidden',
-  position: 'relative',
-  '&::before': {
-    content: '""',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: '4px',
-    background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)',
-  }
-}));
+import { ApplePaper, containerStyles, pageTitleStyles } from '../styles/pageStyles';
 
 const Analysis = () => {
   const { id } = useParams();
@@ -64,12 +44,7 @@ const Analysis = () => {
 
   return (
     <PageContainer>
-      <Box sx={{
-        width: { xs: '100%', md: '90%', lg: '80%' },
-        maxWidth: '1200px',
-        mx: 'auto',
-        p: { xs: 2, md: 3 },
-      }}>
+      <Box sx={containerStyles}>
         <ApplePaper>
           {/* Header con pulsante indietro */}
           <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
@@ -89,13 +64,7 @@ const Analysis = () => {
             <Typography 
               variant="h4" 
               component="h1" 
-              sx={{ 
-                fontWeight: 600,
-                fontSize: '1.75rem',
-                background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}
+              sx={pageTitleStyles}
             >
               Dettagli Analisi
             </Typography>

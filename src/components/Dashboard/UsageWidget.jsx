@@ -9,44 +9,14 @@ import {
   Tooltip, Legend
 } from 'recharts';
 import { dashboardService } from '../../services/api';
-
-// Stili comuni riutilizzabili
-const styles = {
-  card: {
-    borderRadius: 3, 
-    borderColor: 'transparent',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-    height: '100%'
-  },
-  cardHeader: {
-    fontWeight: 600,
-    marginBottom: 2
-  },
-  container: {
-    p: 3, 
-    borderRadius: 4, 
-    boxShadow: '0 8px 32px rgba(0,0,0,0.08)', 
-    mb: 4
-  },
-  itemBox: {
-    p: 1.5,
-    borderRadius: 2,
-    bgcolor: 'rgba(0,0,0,0.02)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  errorContainer: {
-    p: 3, 
-    borderRadius: 4, 
-    boxShadow: '0 8px 32px rgba(0,0,0,0.08)', 
-    mb: 4,
-    bgcolor: 'rgba(240, 44, 86, 0.05)'
-  }
-};
-
-// Palette colori
-const COLORS = ['#f02c56', '#7c32ff', '#35a0ee', '#44d7b6', '#ffc658', '#9c71f7', '#fa8231', '#4b7bec'];
+import { COLORS } from '../../styles/themes';
+import styles, {
+  CHART_COLORS,
+  loadingSpinnerStyles,
+  creditCardStyles,
+  serviceChartStyles,
+  serviceDetailStyles
+} from '../../styles/usageWidgetStyles';
 
 // Helper per formattare valori
 const formatCurrency = (value) => {
@@ -63,8 +33,8 @@ const calculateUsagePercentage = (remaining, total) => {
 
 // Componente per il loader
 const LoadingSpinner = () => (
-  <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-    <CircularProgress sx={{ color: '#f02c56' }} />
+  <Box sx={loadingSpinnerStyles.container}>
+    <CircularProgress sx={loadingSpinnerStyles.spinner} />
   </Box>
 );
 
@@ -75,9 +45,9 @@ const ErrorMessage = ({ message }) => (
       variant="h6" 
       gutterBottom 
       sx={{ 
-        fontWeight: 600,
-        mb: 2,
-        color: '#f02c56'
+        fontWeight: 'semibold',
+        mb: 1,
+        color: COLORS.primary.main
       }}
     >
       Errore nel recupero dei dati
@@ -95,16 +65,12 @@ const CreditCard = ({ remainingCredits, remainingDays, totalCostAllTime }) => {
 
   return (
     <Card variant="outlined" sx={styles.card}>
-      <CardContent sx={{ p: { xs: 3, sm: 2 } }}>
+      <CardContent sx={creditCardStyles.cardContent}>
         <Stack spacing={2}>
           <Typography 
             variant="subtitle1" 
             gutterBottom 
-            sx={{ 
-              ...styles.cardHeader,
-              fontSize: { xs: '1.1rem', sm: 'inherit' },
-              mb: { xs: 1, sm: 0.5 }
-            }}
+            sx={styles.cardHeader}
           >
             Crediti Google Cloud
           </Typography>
@@ -112,10 +78,7 @@ const CreditCard = ({ remainingCredits, remainingDays, totalCostAllTime }) => {
           <Stack spacing={1}>
             <Typography 
               variant="h3" 
-              sx={{ 
-                fontWeight: 700,
-                fontSize: { xs: '2.2rem', sm: '2rem' }
-              }}
+              sx={creditCardStyles.creditAmount}
             >
               {formatCurrency(remainingCredits)}
             </Typography>
@@ -124,13 +87,7 @@ const CreditCard = ({ remainingCredits, remainingDays, totalCostAllTime }) => {
                 label={`${remainingDays} giorni rimanenti`} 
                 color="primary" 
                 size="small" 
-                sx={{
-                  bgcolor: 'rgba(124, 50, 255, 0.1)',
-                  color: '#7c32ff',
-                  border: 'none',
-                  fontSize: { xs: '0.8rem', sm: '0.75rem' },
-                  alignSelf: 'flex-start'
-                }}
+                sx={creditCardStyles.daysChip}
               />
             )}
           </Stack>
@@ -139,20 +96,12 @@ const CreditCard = ({ remainingCredits, remainingDays, totalCostAllTime }) => {
             <LinearProgress 
               variant="determinate" 
               value={Math.min(100, usagePercentage)}
-              sx={{ 
-                height: { xs: 12, sm: 10 },
-                borderRadius: 5,
-                mb: 1,
-                bgcolor: 'rgba(240, 44, 86, 0.1)',
-                '& .MuiLinearProgress-bar': {
-                  background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)'
-                }
-              }} 
+              sx={creditCardStyles.progressBar} 
             />
             <Typography 
               variant="caption" 
               color="text.secondary"
-              sx={{ fontSize: { xs: '0.85rem', sm: 'inherit' } }}
+              sx={creditCardStyles.progressText}
             >
               {!isNaN(usagePercentage) 
                 ? `${usagePercentage.toFixed(1)}% utilizzato` 
@@ -182,7 +131,7 @@ const CostSummaryCard = ({
         <Box>
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="body2" color="text.secondary">Ultimo mese:</Typography>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'semibold' }}>
               {formatCurrency(totalCost)}
             </Typography>
           </Stack>
@@ -198,7 +147,7 @@ const CostSummaryCard = ({
           
           <Stack direction="row" justifyContent="space-between" alignItems="center">
             <Typography variant="body2" color="text.secondary">Da inizio progetto:</Typography>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            <Typography variant="h6" sx={{ fontWeight: 'semibold' }}>
               {formatCurrency(totalCostAllTime)}
             </Typography>
           </Stack>
@@ -228,12 +177,7 @@ const ServiceChart = ({ serviceData }) => (
       </Typography>
       
       {serviceData && serviceData.length > 0 ? (
-        <Box sx={{ 
-          height: 350,
-          position: 'relative',
-          mx: 'auto',
-          width: 350
-        }}>
+        <Box sx={serviceChartStyles.container}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -254,11 +198,9 @@ const ServiceChart = ({ serviceData }) => (
                     <text 
                       x={x} 
                       y={y} 
-                      fill="#333333"
                       textAnchor={x > cx ? 'start' : 'end'} 
                       dominantBaseline="central"
-                      fontWeight="bold"
-                      fontSize="14"
+                      sx={serviceChartStyles.percentageLabel}
                     >
                       {`${percentage}%`}
                     </text>
@@ -267,30 +209,18 @@ const ServiceChart = ({ serviceData }) => (
                 labelLine={true}
               >
                 {serviceData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip 
                 formatter={(value, name) => [`${value.toFixed(4)} €`, name]}
-                contentStyle={{
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  border: 'none'
-                }}
+                contentStyle={serviceChartStyles.tooltipStyle}
               />
             </PieChart>
           </ResponsiveContainer>
         </Box>
       ) : (
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center',
-          height: 300,
-          bgcolor: 'rgba(0,0,0,0.02)',
-          borderRadius: 2,
-          p: 3
-        }}>
+        <Box sx={serviceChartStyles.noDataContainer}>
           <Typography variant="body2" color="text.secondary">
             Nessun dato di consumo disponibile
           </Typography>
@@ -307,63 +237,42 @@ const ServiceDetailCard = ({ services }) => (
     display: 'flex',
     flexDirection: 'column'
   }}>
-    <CardContent sx={{ 
-      flex: 1, 
-      display: 'flex', 
-      flexDirection: 'column',
-      p: { xs: 2.5, sm: 2 }
-    }}>
+    <CardContent sx={serviceDetailStyles.container}>
       <Typography 
         variant="subtitle1" 
         gutterBottom 
-        sx={{ 
-          ...styles.cardHeader,
-          fontSize: { xs: '1.1rem', sm: 'inherit' },
-          mb: { xs: 2, sm: 1.5 }
-        }}
+        sx={styles.cardHeader}
       >
         Dettaglio Servizi
       </Typography>
       
       {services && services.length > 0 ? (
-        <Stack spacing={{ xs: 2, sm: 1.5 }} sx={{ flex: 1, overflow: 'auto', maxHeight: { xs: 'none', sm: 350 } }}>
+        <Stack spacing={{ xs: 2, sm: 1.5 }} sx={serviceDetailStyles.list}>
           {services.map((service, index) => (
             <Box 
               key={index}
               sx={{
                 ...styles.itemBox,
-                p: { xs: 2, sm: 1.5 },
-                borderRadius: { xs: 3, sm: 2 }
+                ...serviceDetailStyles.itemBox
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', maxWidth: '70%' }}>
                 <Box
                   sx={{
-                    width: { xs: 14, sm: 12 },
-                    height: { xs: 14, sm: 12 },
-                    bgcolor: COLORS[index % COLORS.length],
-                    borderRadius: '50%',
-                    mr: 1.5,
-                    flexShrink: 0
+                    ...serviceDetailStyles.colorDot,
+                    bgcolor: CHART_COLORS[index % CHART_COLORS.length]
                   }}
                 />
                 <Typography 
                   variant="body2" 
-                  sx={{ 
-                    fontWeight: 500,
-                    fontSize: { xs: '0.9rem', sm: 'inherit' }
-                  }}
+                  sx={serviceDetailStyles.serviceName}
                 >
                   {service.service}
                 </Typography>
               </Box>
               <Typography 
                 variant="body2" 
-                sx={{ 
-                  fontWeight: 600, 
-                  ml: 1,
-                  fontSize: { xs: '0.9rem', sm: 'inherit' }
-                }}
+                sx={serviceDetailStyles.serviceCost}
               >
                 {formatCurrency(service.cost)}
               </Typography>
@@ -371,14 +280,7 @@ const ServiceDetailCard = ({ services }) => (
           ))}
         </Stack>
       ) : (
-        <Box sx={{
-          p: 3,
-          borderRadius: 2,
-          bgcolor: 'rgba(0,0,0,0.02)',
-          display: 'flex',
-          justifyContent: 'center',
-          flex: 1
-        }}>
+        <Box sx={serviceDetailStyles.noDataBox}>
           <Typography variant="body2" color="text.secondary">
             Nessun dato di servizio disponibile
           </Typography>
@@ -433,21 +335,12 @@ const UsageWidget = () => {
       <Typography 
         variant="h6" 
         gutterBottom 
-        sx={{ 
-          fontWeight: 600,
-          mb: 2,
-          fontSize: { xs: '1.25rem', sm: '1.25rem' },
-          textAlign: { xs: 'center', sm: 'left' },
-          background: { xs: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 50%, #35a0ee 100%)', sm: 'none' },
-          WebkitBackgroundClip: { xs: 'text', sm: 'none' },
-          WebkitTextFillColor: { xs: 'transparent', sm: 'inherit' },
-          p: { xs: 1, sm: 0 }
-        }}
+        sx={styles.mainTitle}
       >
         Monitoraggio Consumi API
       </Typography>
       
-      <Divider sx={{ mb: 3 }} />
+      <Divider sx={{ mb: 2 }} />
       
       <Grid container spacing={3}>
         {/* Prima riga: Crediti rimanenti */}

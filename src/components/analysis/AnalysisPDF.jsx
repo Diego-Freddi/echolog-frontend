@@ -1,156 +1,103 @@
 import React from 'react';
-import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer';
-
-// Definizione degli stili PDF
-const styles = StyleSheet.create({
-  page: {
-    padding: 30,
-    fontFamily: 'Helvetica'
-  },
-  section: {
-    marginBottom: 20
-  },
-  title: {
-    fontSize: 16,
-    marginBottom: 10,
-    fontWeight: 'bold',
-    color: '#f02c56'
-  },
-  sectionTitle: {
-    fontSize: 14,
-    marginBottom: 5,
-    fontWeight: 'bold',
-    color: '#7c32ff'
-  },
-  paragraph: {
-    fontSize: 12,
-    lineHeight: 1.5,
-    marginBottom: 10
-  },
-  tone: {
-    fontSize: 12,
-    padding: 5,
-    backgroundColor: '#f5f5f7',
-    borderRadius: 4,
-    marginBottom: 10,
-    alignSelf: 'flex-start'
-  },
-  keywordsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 10
-  },
-  keyword: {
-    fontSize: 10,
-    backgroundColor: '#f5f5f7',
-    padding: 5,
-    margin: 2,
-    borderRadius: 4
-  },
-  accordion: {
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 4
-  },
-  header: {
-    marginBottom: 20,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f02c56',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center'
-  },
-  logo: {
-    fontSize: 16,
-    color: '#f02c56',
-    fontWeight: 'bold'
-  },
-  date: {
-    fontSize: 10,
-    color: '#666'
-  }
-});
+import PropTypes from 'prop-types';
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
+import { pdfStyles, isValidArray } from '../../styles/analysisPDFStyles';
 
 /**
- * Componente PDF professionale per la visualizzazione dell'analisi
+ * Componente per la generazione del PDF dell'analisi
+ * Utilizza @react-pdf/renderer per la creazione del documento PDF
  */
-const AnalysisPDF = ({ analysis }) => {
-  // Formatta la data corrente
-  const currentDate = new Date().toLocaleDateString('it-IT', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+const AnalysisPDF = ({ analysis, locale = 'it-IT' }) => {
+  // Formatta la data nel formato locale
+  const formattedDate = new Date().toLocaleDateString(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
   });
 
   return (
     <Document>
-      <Page size="A4" style={styles.page}>
-        {/* Intestazione */}
-        <View style={styles.header}>
-          <Text style={styles.logo}>EchoLog</Text>
-          <Text style={styles.date}>{currentDate}</Text>
+      <Page size="A4" style={pdfStyles.page}>
+        {/* Header con logo e data */}
+        <View style={pdfStyles.header}>
+          <Text style={pdfStyles.logo}>EchoLog Analysis</Text>
+          <Text style={pdfStyles.date}>{formattedDate}</Text>
         </View>
-        
-        {/* Titolo documento */}
-        <View style={styles.section}>
-          <Text style={[styles.title, { fontSize: 18 }]}>Analisi del testo</Text>
+
+        {/* Titolo del documento */}
+        <View style={pdfStyles.section}>
+          <Text style={pdfStyles.title}>{analysis?.title || 'Analisi audio'}</Text>
         </View>
-        
+
         {/* Riepilogo */}
-        <View style={styles.section}>
-          <Text style={styles.title}>Riepilogo</Text>
-          <Text style={styles.paragraph}>{analysis.summary}</Text>
-        </View>
-        
-        {/* Tono */}
-        {analysis.tone && (
-          <View style={styles.section}>
-            <Text style={styles.title}>Tono</Text>
-            <Text style={styles.tone}>{analysis.tone}</Text>
+        {analysis?.summary && (
+          <View style={pdfStyles.section}>
+            <Text style={pdfStyles.sectionTitle}>Riepilogo</Text>
+            <Text style={pdfStyles.paragraph}>{analysis.summary}</Text>
           </View>
         )}
-        
-        {/* Parole chiave */}
-        {/* {analysis.keywords && analysis.keywords.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.title}>Parole chiave</Text>
-            <View style={styles.keywordsContainer}>
-              {analysis.keywords.map((keyword, i) => (
-                <Text key={i} style={styles.keyword}>{keyword}</Text>
+
+        {/* Tono */}
+        {analysis?.tone && (
+          <View style={pdfStyles.section}>
+            <Text style={pdfStyles.sectionTitle}>Tono</Text>
+            <Text style={pdfStyles.tone}>{analysis.tone}</Text>
+          </View>
+        )}
+
+        {/* Parole Chiave */}
+        {isValidArray(analysis?.keywords) && (
+          <View style={pdfStyles.section}>
+            <Text style={pdfStyles.sectionTitle}>Parole Chiave</Text>
+            <View style={pdfStyles.keywordsContainer}>
+              {analysis.keywords.map((keyword, index) => (
+                <Text key={`keyword-${index}`} style={pdfStyles.keyword}>
+                  {keyword}
+                </Text>
               ))}
             </View>
           </View>
-        )} */}
-        
+        )}
+
         {/* Sezioni tematiche */}
-        {analysis.sections && analysis.sections.length > 0 && (
-          <View style={styles.section}>
-            <Text style={styles.title}>Sezioni tematiche</Text>
-            {analysis.sections.map((section, i) => (
-              <View key={i} style={styles.accordion}>
-                <Text style={styles.sectionTitle}>{section.title}</Text>
-                <Text style={styles.paragraph}>{section.content}</Text>
-                {section.keywords && section.keywords.length > 0 && (
-                  <View style={styles.keywordsContainer}>
-                    {section.keywords.map((keyword, j) => (
-                      <Text key={j} style={styles.keyword}>{keyword}</Text>
-                    ))}
-                  </View>
-                )}
+        {isValidArray(analysis?.sections) && (
+          <View style={pdfStyles.section}>
+            <Text style={pdfStyles.sectionTitle}>Sezioni Tematiche</Text>
+            {analysis.sections.map((section, index) => (
+              <View key={`section-${index}`} style={pdfStyles.accordion}>
+                <Text style={[pdfStyles.paragraph, { fontWeight: 'bold' }]}>
+                  {section.title}
+                </Text>
+                <Text style={pdfStyles.paragraph}>{section.content}</Text>
               </View>
             ))}
           </View>
         )}
 
         {/* Footer */}
-        <Text style={{ fontSize: 8, color: '#999', position: 'absolute', bottom: 30, left: 30 }}>
-          Generato con EchoLog - Documento PDF vettoriale
+        <Text style={pdfStyles.footer}>
+          Generato con EchoLog - {formattedDate}
         </Text>
       </Page>
     </Document>
   );
+};
+
+// Validazione delle props
+AnalysisPDF.propTypes = {
+  analysis: PropTypes.shape({
+    title: PropTypes.string,
+    summary: PropTypes.string,
+    tone: PropTypes.string,
+    keywords: PropTypes.arrayOf(PropTypes.string),
+    sections: PropTypes.arrayOf(
+      PropTypes.shape({
+        title: PropTypes.string.isRequired,
+        content: PropTypes.string.isRequired
+      })
+    )
+  }).isRequired,
+  locale: PropTypes.string
 };
 
 export default AnalysisPDF; 

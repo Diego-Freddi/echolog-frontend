@@ -11,8 +11,7 @@ import {
   IconButton,
   TextField,
   Tooltip,
-  Stack,
-  Divider
+  Stack
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -29,6 +28,7 @@ import {
 import { TagCloud } from 'react-tagcloud';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import AnalysisPDF from './AnalysisPDF';
+import styles from '../../styles/analysisViewStyles';
 
 /**
  * Componente per visualizzare i risultati dell'analisi del testo
@@ -65,12 +65,6 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
       };
     });
   }, [analysis]);
-  
-  // Configurazione TagCloud con colori del tema
-  const cloudOptions = {
-    luminosity: theme.palette.mode === 'dark' ? 'light' : 'dark',
-    hue: theme.palette.primary.main
-  };
   
   if (!analysis) return null;
   
@@ -202,28 +196,25 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
     });
   };
   
+  // Componente per l'intestazione delle sezioni
+  const SectionHeader = ({ icon: Icon, title }) => (
+    <Box sx={styles.sectionHeader}>
+      <Icon sx={styles.icon(theme)} aria-hidden="true" />
+      <Typography variant="h6" sx={styles.sectionTitle(theme)}>
+        {title}
+      </Typography>
+    </Box>
+  );
+  
   return (
     <Box>
       {/* Barra superiore con pulsanti */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: { xs: 1.5, sm: 2 },
-        flexWrap: 'wrap',
-        gap: 1
-      }}>
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            color: theme.palette.primary.main,
-            fontSize: { xs: '1.125rem', sm: '1.25rem' }
-          }}
-        >
+      <Box sx={styles.topBar}>
+        <Typography variant="h6" sx={styles.sectionTitle(theme)}>
           Analisi
         </Typography>
         
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={styles.actionsContainer}>
           {isEditing ? (
             <>
               <Tooltip title="Salva modifiche">
@@ -241,10 +232,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                 startIcon={<SaveIcon />}
                 onClick={handleSave}
                 size="small"
-                sx={{ 
-                  display: { xs: 'none', sm: 'flex' },
-                  borderRadius: 2
-                }}
+                sx={{ display: { xs: 'none', sm: 'flex' }, borderRadius: 2 }}
               >
                 Salva
               </Button>
@@ -264,10 +252,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                 startIcon={<CancelIcon />}
                 onClick={handleCancel}
                 size="small"
-                sx={{ 
-                  display: { xs: 'none', sm: 'flex' },
-                  borderRadius: 2
-                }}
+                sx={{ display: { xs: 'none', sm: 'flex' }, borderRadius: 2 }}
               >
                 Annulla
               </Button>
@@ -299,12 +284,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                       sx={{ 
                         display: { xs: 'none', sm: 'flex' },
                         borderRadius: 2,
-                        borderColor: theme.palette.primary.main,
-                        color: theme.palette.primary.main,
-                        '&:hover': {
-                          backgroundColor: 'rgba(240,44,86,0.04)',
-                          borderColor: theme.palette.primary.main,
-                        }
+                        ...styles.buttonPrimary(theme)
                       }}
                     >
                       {loading ? 'Preparazione...' : 'Esporta PDF'}
@@ -330,10 +310,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                     startIcon={<EditIcon />}
                     onClick={handleEditStart}
                     size="small"
-                    sx={{ 
-                      display: { xs: 'none', sm: 'flex' },
-                      borderRadius: 2
-                    }}
+                    sx={{ display: { xs: 'none', sm: 'flex' }, borderRadius: 2 }}
                   >
                     Modifica
                   </Button>
@@ -345,32 +322,13 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
       </Box>
       
       {/* Contenuto */}
-      <Box sx={{ p: { xs: 0.5, sm: 1 } }}>
+      <Box sx={styles.container}>
         {isEditing ? (
           // MODALITÀ MODIFICA
           <>
             {/* Riepilogo */}
-            <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                mb: { xs: 0.5, sm: 1 }
-              }}>
-                <InfoIcon sx={{ 
-                  color: theme.palette.primary.main, 
-                  mr: 1,
-                  fontSize: { xs: '1.25rem', sm: '1.5rem' }
-                }} />
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    color: theme.palette.primary.main,
-                    fontSize: { xs: '1rem', sm: '1.25rem' }
-                  }}
-                >
-                  Riepilogo
-                </Typography>
-              </Box>
+            <Box sx={styles.sectionContainer}>
+              <SectionHeader icon={InfoIcon} title="Riepilogo" />
               <TextField
                 multiline
                 fullWidth
@@ -379,39 +337,13 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                 variant="outlined"
                 minRows={3}
                 maxRows={10}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    bgcolor: theme.palette.background.paper,
-                    borderRadius: 2,
-                    fontSize: { xs: '0.875rem', sm: '1rem' },
-                    lineHeight: { xs: 1.5, sm: 1.75 }
-                  }
-                }}
+                sx={styles.textField(theme)}
               />
             </Box>
             
             {/* Tono */}
-            <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                mb: { xs: 0.5, sm: 1 }
-              }}>
-                <LightbulbIcon sx={{ 
-                  color: theme.palette.primary.main, 
-                  mr: 1,
-                  fontSize: { xs: '1.25rem', sm: '1.5rem' }
-                }} />
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    color: theme.palette.primary.main,
-                    fontSize: { xs: '1rem', sm: '1.25rem' }
-                  }}
-                >
-                  Tono
-                </Typography>
-              </Box>
+            <Box sx={styles.sectionContainer}>
+              <SectionHeader icon={LightbulbIcon} title="Tono" />
               <TextField
                 fullWidth
                 value={editedAnalysis.tone || ''}
@@ -419,37 +351,16 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                 placeholder="Inserisci il tono (es. formale, informale, tecnico)"
                 variant="outlined"
                 size="small"
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    bgcolor: theme.palette.background.paper,
-                    borderRadius: 2,
-                    fontSize: { xs: '0.875rem', sm: '1rem' }
-                  }
-                }}
+                sx={styles.textField(theme)}
               />
             </Box>
             
             {/* Parole chiave */}
-            <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'space-between', 
-                mb: { xs: 0.5, sm: 1 }
-              }}>
+            <Box sx={styles.sectionContainer}>
+              <Box sx={styles.editorHeader}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <LabelIcon sx={{ 
-                    color: theme.palette.primary.main, 
-                    mr: 1,
-                    fontSize: { xs: '1.25rem', sm: '1.5rem' }
-                  }} />
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      color: theme.palette.primary.main,
-                      fontSize: { xs: '1rem', sm: '1.25rem' }
-                    }}
-                  >
+                  <LabelIcon sx={styles.icon(theme)} />
+                  <Typography variant="h6" sx={styles.sectionTitle(theme)}>
                     Parole chiave
                   </Typography>
                 </Box>
@@ -474,13 +385,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                       placeholder="Parola chiave"
                       variant="outlined"
                       size="small"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: theme.palette.background.paper,
-                          borderRadius: 2,
-                          fontSize: { xs: '0.875rem', sm: '1rem' }
-                        }
-                      }}
+                      sx={styles.textField(theme)}
                     />
                     <Tooltip title="Rimuovi">
                       <IconButton 
@@ -498,19 +403,8 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
             
             {/* Sezioni tematiche */}
             <Box>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'space-between', 
-                mb: { xs: 0.5, sm: 1 }
-              }}>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    color: theme.palette.primary.main,
-                    fontSize: { xs: '1rem', sm: '1.25rem' }
-                  }}
-                >
+              <Box sx={styles.editorHeader}>
+                <Typography variant="h6" sx={styles.sectionTitle(theme)}>
                   Sezioni tematiche
                 </Typography>
                 <Tooltip title="Aggiungi sezione">
@@ -525,22 +419,8 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
               </Box>
               
               {editedAnalysis.sections && editedAnalysis.sections.map((section, sectionIndex) => (
-                <Box 
-                  key={sectionIndex} 
-                  sx={{ 
-                    mb: { xs: 1.5, sm: 2 },
-                    p: { xs: 1, sm: 2 },
-                    border: `1px solid ${theme.palette.divider}`,
-                    borderRadius: 2,
-                    backgroundColor: theme.palette.background.paper
-                  }}
-                >
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'space-between', 
-                    mb: { xs: 1, sm: 2 }
-                  }}>
+                <Box key={sectionIndex} sx={styles.editorSection(theme)}>
+                  <Box sx={styles.editorHeader}>
                     <TextField
                       fullWidth
                       value={section.title}
@@ -548,13 +428,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                       placeholder="Titolo sezione"
                       variant="outlined"
                       size="small"
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: theme.palette.background.paper,
-                          borderRadius: 2,
-                          fontSize: { xs: '0.875rem', sm: '1rem' }
-                        }
-                      }}
+                      sx={styles.textField(theme)}
                     />
                     <Tooltip title="Rimuovi sezione">
                       <IconButton 
@@ -578,29 +452,12 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                     maxRows={6}
                     sx={{
                       mb: { xs: 1, sm: 2 },
-                      '& .MuiOutlinedInput-root': {
-                        bgcolor: theme.palette.background.paper,
-                        borderRadius: 2,
-                        fontSize: { xs: '0.875rem', sm: '1rem' },
-                        lineHeight: { xs: 1.5, sm: 1.75 }
-                      }
+                      ...styles.textField(theme)
                     }}
                   />
                   
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'space-between', 
-                    mb: { xs: 0.5, sm: 1 }
-                  }}>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        fontWeight: 500, 
-                        color: theme.palette.text.primary,
-                        fontSize: { xs: '0.75rem', sm: '0.875rem' }
-                      }}
-                    >
+                  <Box sx={styles.editorHeader}>
+                    <Typography variant="body2" sx={styles.smallHeading(theme)}>
                       Parole chiave della sezione
                     </Typography>
                     <Tooltip title="Aggiungi parola chiave">
@@ -624,13 +481,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                           placeholder="Parola chiave"
                           variant="outlined"
                           size="small"
-                          sx={{
-                            '& .MuiOutlinedInput-root': {
-                              bgcolor: theme.palette.background.paper,
-                              borderRadius: 2,
-                              fontSize: { xs: '0.875rem', sm: '1rem' }
-                            }
-                          }}
+                          sx={styles.textField(theme)}
                         />
                         <Tooltip title="Rimuovi">
                           <IconButton 
@@ -652,27 +503,8 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
           // MODALITÀ VISUALIZZAZIONE
           <>
             {/* Riepilogo */}
-            <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                mb: { xs: 0.5, sm: 1 }
-              }}>
-                <InfoIcon sx={{ 
-                  color: theme.palette.primary.main, 
-                  mr: 1,
-                  fontSize: { xs: '1.25rem', sm: '1.5rem' }
-                }} />
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    color: theme.palette.primary.main,
-                    fontSize: { xs: '1rem', sm: '1.25rem' }
-                  }}
-                >
-                  Riepilogo
-                </Typography>
-              </Box>
+            <Box sx={styles.sectionContainer}>
+              <SectionHeader icon={InfoIcon} title="Riepilogo" />
               <Typography 
                 variant="body1" 
                 sx={{ 
@@ -687,77 +519,19 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
             
             {/* Tono */}
             {tone && (
-              <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  mb: { xs: 0.5, sm: 1 }
-                }}>
-                  <LightbulbIcon sx={{ 
-                    color: theme.palette.primary.main, 
-                    mr: 1,
-                    fontSize: { xs: '1.25rem', sm: '1.5rem' }
-                  }} />
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      color: theme.palette.primary.main,
-                      fontSize: { xs: '1rem', sm: '1.25rem' }
-                    }}
-                  >
-                    Tono
-                  </Typography>
-                </Box>
-                <Chip 
-                  label={tone} 
-                  sx={{ 
-                    backgroundColor: theme.palette.mode === 'dark' 
-                      ? 'rgba(240,44,86,0.2)' 
-                      : 'rgba(240,44,86,0.1)',
-                    color: theme.palette.primary.main,
-                    fontWeight: 500,
-                    borderRadius: 4,
-                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                    height: { xs: 24, sm: 32 }
-                  }} 
-                />
+              <Box sx={styles.sectionContainer}>
+                <SectionHeader icon={LightbulbIcon} title="Tono" />
+                <Chip label={tone} sx={styles.chip(theme)} />
               </Box>
             )}
             
             {/* Parole chiave - Tag Cloud */}
             {keywords && keywords.length > 0 && (
-              <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  mb: { xs: 0.5, sm: 1 }
-                }}>
-                  <LabelIcon sx={{ 
-                    color: theme.palette.primary.main, 
-                    mr: 1,
-                    fontSize: { xs: '1.25rem', sm: '1.5rem' }
-                  }} />
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      color: theme.palette.primary.main,
-                      fontSize: { xs: '1rem', sm: '1.25rem' }
-                    }}
-                  >
-                    Parole chiave
-                  </Typography>
-                </Box>
+              <Box sx={styles.sectionContainer}>
+                <SectionHeader icon={LabelIcon} title="Parole chiave" />
                 
                 {/* Visualizzazione Tag Cloud */}
-                <Box sx={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  p: { xs: 1, sm: 2 }, 
-                  backgroundColor: theme.palette.background.paper,
-                  borderRadius: 2,
-                  mb: { xs: 1, sm: 2 },
-                  overflow: 'hidden'
-                }}>
+                <Box sx={styles.tagCloud(theme)} role="list" aria-label="Nuvola di parole chiave">
                   <TagCloud
                     minSize={12}
                     maxSize={30}
@@ -766,23 +540,16 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                     renderer={(tag, size, color) => (
                       <span
                         key={tag.value}
-                        style={{
-                          animation: 'blinker 3s linear infinite',
-                          animationDelay: `${Math.random() * 2}s`,
-                          fontSize: `${size}px`,
-                          margin: '3px',
-                          padding: '3px',
-                          display: 'inline-block',
-                          color: theme.palette.text.primary,
-                          fontWeight: 'bold',
-                          opacity: size / 30 + 0.5,
-                          cursor: onKeywordClick ? 'pointer' : 'default',
-                          transition: 'all 0.3s ease',
-                          '&:hover': {
-                            color: theme.palette.primary.main,
-                            transform: 'scale(1.1)'
+                        style={styles.tagCloudItem(size, theme)}
+                        role="listitem"
+                        aria-label={`Parola chiave: ${tag.value}`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            onKeywordClick && onKeywordClick(tag.value);
                           }
                         }}
+                        tabIndex={0}
                       >
                         {tag.value}
                       </span>
@@ -795,76 +562,30 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
             {/* Sezioni tematiche */}
             {sections && sections.length > 0 && (
               <Box>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
-                    color: theme.palette.primary.main,
-                    mb: { xs: 0.5, sm: 1 },
-                    fontSize: { xs: '1rem', sm: '1.25rem' }
-                  }}
-                >
+                <Typography variant="h6" sx={styles.sectionTitle(theme)}>
                   Sezioni tematiche
                 </Typography>
                 {sections.map((section, index) => (
-                  <Accordion 
-                    key={index}
-                    sx={{ 
-                      mb: { xs: 0.5, sm: 1 },
-                      borderRadius: '8px!important',
-                      '&:before': { display: 'none' },
-                      boxShadow: 'none',
-                      border: `1px solid ${theme.palette.divider}`,
-                      backgroundColor: theme.palette.background.paper
-                    }}
-                  >
-                    <AccordionSummary
-                      expandIcon={<ExpandMoreIcon />}
-                      sx={{ 
-                        borderRadius: 2,
-                        backgroundColor: theme.palette.action.hover,
-                        minHeight: { xs: 40, sm: 48 }
-                      }}
-                    >
-                      <Typography 
-                        sx={{ 
-                          fontWeight: 500,
-                          fontSize: { xs: '0.875rem', sm: '1rem' }
-                        }}
-                      >
+                  <Accordion key={index} sx={styles.accordion(theme)}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={styles.accordionSummary(theme)}>
+                      <Typography sx={styles.accordionTitle}>
                         {section.title}
                       </Typography>
                     </AccordionSummary>
-                    <AccordionDetails sx={{ p: { xs: 1, sm: 2 } }}>
-                      <Typography 
-                        sx={{ 
-                          mb: { xs: 1, sm: 2 },
-                          fontSize: { xs: '0.875rem', sm: '1rem' },
-                          lineHeight: { xs: 1.5, sm: 1.75 }
-                        }}
-                      >
+                    <AccordionDetails sx={styles.accordionDetails}>
+                      <Typography sx={styles.accordionContent}>
                         {section.content}
                       </Typography>
                       {section.keywords && section.keywords.length > 0 && (
-                        <Box sx={{ 
-                          display: 'flex', 
-                          flexWrap: 'wrap', 
-                          gap: { xs: 0.5, sm: 1 }
-                        }}>
+                        <Box sx={styles.keywordsContainer}>
                           {section.keywords.map((keyword, keywordIndex) => (
                             <Chip 
                               key={keywordIndex}
                               label={keyword}
                               size="small"
                               onClick={() => onKeywordClick(keyword)}
-                              sx={{ 
-                                backgroundColor: theme.palette.mode === 'dark' 
-                                  ? 'rgba(240,44,86,0.2)' 
-                                  : 'rgba(240,44,86,0.1)',
-                                color: theme.palette.primary.main,
-                                fontWeight: 500,
-                                borderRadius: 4,
-                                fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                                height: { xs: 24, sm: 32 },
+                              sx={{
+                                ...styles.chip(theme),
                                 cursor: onKeywordClick ? 'pointer' : 'default',
                                 '&:hover': onKeywordClick ? {
                                   backgroundColor: theme.palette.mode === 'dark' 

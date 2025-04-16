@@ -9,6 +9,8 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import PageContainer from '../components/layout/PageContainer';
+import { AppleCard, GradientButton, buttonStyles } from '../styles/pageStyles';
+import { BORDERS, SHADOWS } from '../styles/themes';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -23,8 +25,8 @@ const Dashboard = () => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderRadius: '16px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+        borderRadius: BORDERS.radius.md,
+        boxShadow: SHADOWS.md,
         border: '1px solid rgba(240,44,86,0.1)',
         position: 'relative',
         overflow: 'hidden',
@@ -32,7 +34,7 @@ const Dashboard = () => {
         cursor: 'pointer',
         '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: '0 12px 48px rgba(0,0,0,0.12)'
+            boxShadow: SHADOWS.lg
         },
         '&::before': {
             content: '""',
@@ -53,20 +55,6 @@ const Dashboard = () => {
         justifyContent: 'center',
         width: '100%',
         mb: 3
-    };
-
-    const buttonStyle = {
-        width: '100%',
-        maxWidth: 280,
-        py: 1.5,
-        borderRadius: '12px',
-        textTransform: 'none',
-        fontSize: '1rem',
-        fontWeight: 500,
-        boxShadow: 'none',
-        '&:hover': {
-            boxShadow: 'none'
-        }
     };
 
     return (
@@ -136,19 +124,11 @@ const Dashboard = () => {
                                     Registra e trascrivi audio con un click
                                 </Typography>
                             </Box>
-                            <Button
-                                variant="contained"
-                                sx={{
-                                    ...buttonStyle,
-                                    background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)',
-                                    '&:hover': {
-                                        background: 'linear-gradient(90deg, #e02951 0%, #6c2be0 100%)'
-                                    }
-                                }}
+                            <GradientButton
                                 startIcon={<MicIcon />}
                             >
                                 Registra Ora
-                            </Button>
+                            </GradientButton>
                         </Paper>
 
                         {/* Text Analyzer */}
@@ -162,19 +142,11 @@ const Dashboard = () => {
                                     Analizza testo da file o input diretto
                                 </Typography>
                             </Box>
-                            <Button
-                                variant="contained"
-                                sx={{
-                                    ...buttonStyle,
-                                    background: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)',
-                                    '&:hover': {
-                                        background: 'linear-gradient(90deg, #e02951 0%, #6c2be0 100%)'
-                                    }
-                                }}
+                            <GradientButton
                                 startIcon={<DescriptionIcon />}
                             >
                                 Analizza Testo
-                            </Button>
+                            </GradientButton>
                         </Paper>
 
                         {/* Cronologia */}
@@ -191,7 +163,7 @@ const Dashboard = () => {
                             <Button
                                 variant="outlined"
                                 sx={{
-                                    ...buttonStyle,
+                                    ...buttonStyles.secondary,
                                     borderColor: '#7c32ff',
                                     color: '#7c32ff',
                                     '&:hover': {
@@ -219,7 +191,7 @@ const Dashboard = () => {
                             <Button
                                 variant="outlined"
                                 sx={{
-                                    ...buttonStyle,
+                                    ...buttonStyles.secondary,
                                     borderColor: '#35a0ee',
                                     color: '#35a0ee',
                                     '&:hover': {

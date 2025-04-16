@@ -23,6 +23,7 @@ import {
 } from '@mui/icons-material';
 import { analysisService } from '../../services/api';
 import AnalysisView from '../analysis/AnalysisView';
+import styles, { tabPanelStyles, getHighlightStyle } from '../../styles/transcriptionViewStyles';
 
 // Componente TabPanel per gestire il contenuto delle tab
 function TabPanel(props) {
@@ -176,7 +177,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
   if (!text && !loading) return null;
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={styles.container}>
       {/* Tabs container */}
       <Box sx={{ 
         borderBottom: 1, 
@@ -193,35 +194,17 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
           variant="scrollable"
           scrollButtons="auto"
           allowScrollButtonsMobile
-          sx={{
-            '& .MuiTab-root': {
-              minHeight: { xs: 48, sm: 56 },
-              fontSize: { xs: '0.875rem', sm: '0.9rem' },
-              px: { xs: 1, sm: 2 },
-            }
-          }}
+          sx={styles.tabs}
         >
           <Tab 
             icon={<TextFieldsIcon />} 
             label="Trascrizione" 
-            sx={{
-              flexDirection: { xs: 'row', sm: 'column' },
-              gap: { xs: 1, sm: 0 },
-              '& .MuiTab-iconWrapper': {
-                mr: { xs: 1, sm: 0 }
-              }
-            }}
+            sx={styles.tab}
           />
           <Tab 
             icon={<PsychologyIcon />} 
             label="Analisi"
-            sx={{
-              flexDirection: { xs: 'row', sm: 'column' },
-              gap: { xs: 1, sm: 0 },
-              '& .MuiTab-iconWrapper': {
-                mr: { xs: 1, sm: 0 }
-              }
-            }}
+            sx={styles.tab}
           />
         </Tabs>
       </Box>
@@ -251,21 +234,21 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                 />
               }
               label={
-                <Typography variant="body2" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
+                <Typography variant="body2" sx={styles.switchLabel}>
                   Evidenzia parole chiave
                 </Typography>
               }
             />
             
             {typeof onTextChange === 'function' && (
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={styles.buttonsContainer}>
                 {isEditing ? (
                   <>
                     <Tooltip title="Salva modifiche">
                       <IconButton 
                         size="small" 
                         onClick={handleSave}
-                        sx={{ display: { xs: 'flex', sm: 'none' } }}
+                        sx={styles.mobileButton}
                       >
                         <SaveIcon />
                       </IconButton>
@@ -275,9 +258,9 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                       startIcon={<SaveIcon />}
                       onClick={handleSave}
                       size="small"
-                      sx={{ 
-                        display: { xs: 'none', sm: 'flex' },
-                        borderRadius: 2
+                      sx={{
+                        ...styles.desktopButton,
+                        borderRadius: 2 // Mantengo il valore originale
                       }}
                     >
                       Salva
@@ -287,7 +270,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                       <IconButton 
                         size="small" 
                         onClick={handleCancel}
-                        sx={{ display: { xs: 'flex', sm: 'none' } }}
+                        sx={styles.mobileButton}
                       >
                         <CancelIcon />
                       </IconButton>
@@ -297,9 +280,9 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                       startIcon={<CancelIcon />}
                       onClick={handleCancel}
                       size="small"
-                      sx={{ 
-                        display: { xs: 'none', sm: 'flex' },
-                        borderRadius: 2
+                      sx={{
+                        ...styles.desktopButton,
+                        borderRadius: 2 // Mantengo il valore originale
                       }}
                     >
                       Annulla
@@ -311,7 +294,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                       <IconButton 
                         size="small" 
                         onClick={handleEditStart}
-                        sx={{ display: { xs: 'flex', sm: 'none' } }}
+                        sx={styles.mobileButton}
                       >
                         <EditIcon />
                       </IconButton>
@@ -321,9 +304,9 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                       startIcon={<EditIcon />}
                       onClick={handleEditStart}
                       size="small"
-                      sx={{ 
-                        display: { xs: 'none', sm: 'flex' },
-                        borderRadius: 2
+                      sx={{
+                        ...styles.desktopButton,
+                        borderRadius: 2 // Mantengo il valore originale
                       }}
                     >
                       Modifica
@@ -346,10 +329,10 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
               minRows={5}
               maxRows={20}
               sx={{
+                ...styles.textField,
                 '& .MuiOutlinedInput-root': {
-                  backgroundColor: theme.palette.background.paper,
-                  fontSize: { xs: '0.875rem', sm: '1rem' },
-                  lineHeight: { xs: 1.5, sm: 1.75 }
+                  ...styles.textField['& .MuiOutlinedInput-root'],
+                  backgroundColor: theme.palette.background.paper
                 }
               }}
             />
@@ -360,12 +343,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
               dangerouslySetInnerHTML={{ 
                 __html: highlightKeywords ? processedText : text 
               }}
-              sx={{
-                whiteSpace: 'pre-wrap',
-                fontSize: { xs: '0.875rem', sm: '1rem' },
-                lineHeight: { xs: 1.5, sm: 1.75 },
-                wordBreak: 'break-word'
-              }}
+              sx={styles.transcriptionText}
             />
           )}
         </Box>
@@ -373,31 +351,21 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
         {/* Banner rianalisi */}
         {shouldReanalyze && (
           <Box sx={{ 
+            ...styles.reanalysisBanner,
             mt: { xs: 2, sm: 3 },
             p: { xs: 1.5, sm: 2 },
-            borderRadius: 2,
+            borderRadius: 2, // Mantengo il valore originale
             backgroundColor: theme.palette.mode === 'dark' 
               ? 'rgba(240,44,86,0.1)' 
-              : 'rgba(240,44,86,0.05)',
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: { xs: 'stretch', sm: 'center' },
-            gap: { xs: 1, sm: 2 }
+              : 'rgba(240,44,86,0.05)'
           }}>
             <Typography 
               variant="body2" 
-              sx={{ 
-                flex: 1,
-                fontSize: { xs: '0.75rem', sm: '0.875rem' }
-              }}
+              sx={styles.bannerText}
             >
               Il testo è stato modificato. Vuoi aggiornare l'analisi?
             </Typography>
-            <Box sx={{ 
-              display: 'flex', 
-              gap: 1,
-              justifyContent: { xs: 'flex-end', sm: 'flex-start' }
-            }}>
+            <Box sx={styles.bannerButtons}>
               <Button
                 variant="contained"
                 size="small"
@@ -405,7 +373,10 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                   setShouldReanalyze(false);
                   performAnalysis(editableText, true);
                 }}
-                sx={{ borderRadius: 2 }}
+                sx={{
+                  ...styles.bannerButton,
+                  borderRadius: 2 // Mantengo il valore originale
+                }}
               >
                 Aggiorna
               </Button>
@@ -413,7 +384,10 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                 variant="outlined"
                 size="small"
                 onClick={() => setShouldReanalyze(false)}
-                sx={{ borderRadius: 2 }}
+                sx={{
+                  ...styles.bannerButton,
+                  borderRadius: 2 // Mantengo il valore originale
+                }}
               >
                 No
               </Button>
@@ -425,41 +399,32 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
       {/* Analisi Panel */}
       <TabPanel value={tabValue} index={1}>
         {analysisLoading ? (
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            gap: 2,
-            p: { xs: 2, sm: 3 }
-          }}>
+          <Box sx={styles.loadingContainer}>
             <CircularProgress size={30} />
             <Typography 
               variant="body2" 
               color="text.secondary"
-              sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+              sx={styles.loadingText}
             >
               Analisi con Gemini in corso...
             </Typography>
           </Box>
         ) : analysisError ? (
-          <Box sx={{ 
-            textAlign: 'center', 
-            p: { xs: 2, sm: 3 }
-          }}>
+          <Box sx={styles.errorContainer}>
             <Typography 
               variant="body1" 
               color="error" 
               gutterBottom
-              sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}
+              sx={styles.errorText}
             >
               {analysisError}
             </Typography>
             <Button 
               variant="outlined" 
               onClick={performAnalysis}
-              sx={{ 
-                mt: { xs: 1, sm: 2 },
-                borderRadius: 2
+              sx={{
+                ...styles.retryButton,
+                borderRadius: 2 // Mantengo il valore originale
               }}
             >
               Riprova
@@ -473,7 +438,8 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
               setHighlightKeywords(true);
               // Evidenzia la parola chiave nel testo usando i colori del tema
               const regex = new RegExp(`\\b(${keyword})\\b`, 'gi');
-              const highlightedText = text.replace(regex, `<mark style="background-color: ${theme.palette.mode === 'dark' ? 'rgba(240, 44, 86, 0.3)' : 'rgba(240, 44, 86, 0.15)'}; color: ${theme.palette.text.primary}; padding: 0 4px; border-radius: 2px;">$1</mark>`);
+              const highlightStyle = getHighlightStyle(theme.palette.mode === 'dark');
+              const highlightedText = text.replace(regex, `<mark style="${highlightStyle}">$1</mark>`);
               setProcessedText(highlightedText);
             }}
             onAnalysisChange={(updatedAnalysis) => {
@@ -484,23 +450,17 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
             }}
           />
         ) : (
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center',
-            gap: 2,
-            p: { xs: 2, sm: 3 }
-          }}>
+          <Box sx={styles.analyzeContainer}>
             <Button 
               variant="contained" 
               onClick={performAnalysis}
               startIcon={<PsychologyIcon />}
-              sx={{ 
-                borderRadius: 2,
+              sx={{
+                ...styles.analyzeButton,
+                borderRadius: 2, // Mantengo il valore originale
                 backgroundColor: '#f5f5f7',
                 color: '#000000',
                 boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                transition: 'all 0.2s ease-in-out',
                 '&:hover': {
                   backgroundColor: '#e5e5e7',
                   boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
