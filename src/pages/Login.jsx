@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/layout/Navbar';
 import GoogleLogin from '../components/auth/GoogleLogin';
 import PageContainer from '../components/layout/PageContainer';
+import { BORDERS } from '../styles/themes';
 
 const Login = () => {
   const { user } = useAuth();
@@ -27,7 +28,7 @@ const Login = () => {
         <Paper sx={{ 
           p: { xs: 3, sm: 4 }, 
           width: '100%',
-          borderRadius: '16px',
+          borderRadius: BORDERS.radius.md,
           boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
           border: '1px solid rgba(240,44,86,0.1)',
           position: 'relative',

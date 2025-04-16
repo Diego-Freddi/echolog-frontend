@@ -24,6 +24,7 @@ import {
   textInputStyles,
   resultHeaderStyles
 } from '../styles/textAnalyzerStyles';
+import { BORDERS } from '../styles/themes';
 
 const TextAnalyzer = () => {
   const theme = useTheme();
@@ -275,7 +276,7 @@ const TextAnalyzer = () => {
             <Alert severity="error" sx={{ 
               mb: 3, 
               width: '100%',
-              borderRadius: 2
+              borderRadius: BORDERS.radius.sm
             }}>
               {error}
             </Alert>

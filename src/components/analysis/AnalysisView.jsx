@@ -29,6 +29,7 @@ import { TagCloud } from 'react-tagcloud';
 import { PDFDownloadLink } from '@react-pdf/renderer';
 import AnalysisPDF from './AnalysisPDF';
 import styles from '../../styles/analysisViewStyles';
+import { BORDERS } from '../../styles/themes';
 
 /**
  * Componente per visualizzare i risultati dell'analisi del testo
@@ -232,7 +233,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                 startIcon={<SaveIcon />}
                 onClick={handleSave}
                 size="small"
-                sx={{ display: { xs: 'none', sm: 'flex' }, borderRadius: 2 }}
+                sx={{ display: { xs: 'none', sm: 'flex' }, borderRadius: BORDERS.radius.sm }}
               >
                 Salva
               </Button>
@@ -252,7 +253,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                 startIcon={<CancelIcon />}
                 onClick={handleCancel}
                 size="small"
-                sx={{ display: { xs: 'none', sm: 'flex' }, borderRadius: 2 }}
+                sx={{ display: { xs: 'none', sm: 'flex' }, borderRadius: BORDERS.radius.sm }}
               >
                 Annulla
               </Button>
@@ -283,7 +284,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                       size="small"
                       sx={{ 
                         display: { xs: 'none', sm: 'flex' },
-                        borderRadius: 2,
+                        borderRadius: BORDERS.radius.sm,
                         ...styles.buttonPrimary(theme)
                       }}
                     >
@@ -310,7 +311,7 @@ const AnalysisView = ({ analysis, onKeywordClick, onAnalysisChange }) => {
                     startIcon={<EditIcon />}
                     onClick={handleEditStart}
                     size="small"
-                    sx={{ display: { xs: 'none', sm: 'flex' }, borderRadius: 2 }}
+                    sx={{ display: { xs: 'none', sm: 'flex' }, borderRadius: BORDERS.radius.sm }}
                   >
                     Modifica
                   </Button>

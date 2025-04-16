@@ -4,6 +4,10 @@ import { COLORS } from './themes';
  * File di stili per il componente AnalysisPDF
  * Contiene tutti gli stili necessari per la generazione del PDF di analisi,
  * utilizzando le costanti di stile definite nel file themes.js
+ * 
+ * NOTA: I valori di borderRadius sono numeri diretti anziché riferimenti a BORDERS.radius
+ * perché il componente PDF (@react-pdf/renderer) richiede valori numerici primitivi
+ * e non supporta l'uso di oggetti o riferimenti complessi.
  */
 
 // Adattamento dei colori dal tema globale al formato richiesto da @react-pdf/renderer

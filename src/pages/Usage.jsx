@@ -3,6 +3,7 @@ import { Box, Typography, Grid, Paper } from '@mui/material';
 import PageContainer from '../components/layout/PageContainer';
 import UsageWidget from '../components/Dashboard/UsageWidget';
 import { ApplePaper, containerStyles, pageTitleStyles, pageSubtitleStyles } from '../styles/pageStyles';
+import { BORDERS } from '../styles/themes';
 
 const Usage = () => {
   return (
@@ -34,7 +35,7 @@ const Usage = () => {
             <Grid item xs={12}>
               <Paper sx={{ 
                 p: 3, 
-                borderRadius: 4, 
+                borderRadius: BORDERS.radius.md, 
                 boxShadow: '0 8px 32px rgba(0,0,0,0.08)'
               }}>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>

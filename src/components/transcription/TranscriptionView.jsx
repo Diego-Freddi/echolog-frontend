@@ -24,6 +24,7 @@ import {
 import { analysisService } from '../../services/api';
 import AnalysisView from '../analysis/AnalysisView';
 import styles, { tabPanelStyles, getHighlightStyle } from '../../styles/transcriptionViewStyles';
+import { BORDERS, SPACING, SHADOWS } from '../../styles/themes';
 
 // Componente TabPanel per gestire il contenuto delle tab
 function TabPanel(props) {
@@ -259,8 +260,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                       onClick={handleSave}
                       size="small"
                       sx={{
-                        ...styles.desktopButton,
-                        borderRadius: 2 // Mantengo il valore originale
+                        ...styles.desktopButton
                       }}
                     >
                       Salva
@@ -281,8 +281,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                       onClick={handleCancel}
                       size="small"
                       sx={{
-                        ...styles.desktopButton,
-                        borderRadius: 2 // Mantengo il valore originale
+                        ...styles.desktopButton
                       }}
                     >
                       Annulla
@@ -305,8 +304,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                       onClick={handleEditStart}
                       size="small"
                       sx={{
-                        ...styles.desktopButton,
-                        borderRadius: 2 // Mantengo il valore originale
+                        ...styles.desktopButton
                       }}
                     >
                       Modifica
@@ -352,9 +350,8 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
         {shouldReanalyze && (
           <Box sx={{ 
             ...styles.reanalysisBanner,
-            mt: { xs: 2, sm: 3 },
-            p: { xs: 1.5, sm: 2 },
-            borderRadius: 2, // Mantengo il valore originale
+            mt: { xs: SPACING.sm.xs, sm: SPACING.md.xs },
+            p: { xs: 1.5, sm: SPACING.sm.xs },
             backgroundColor: theme.palette.mode === 'dark' 
               ? 'rgba(240,44,86,0.1)' 
               : 'rgba(240,44,86,0.05)'
@@ -374,8 +371,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                   performAnalysis(editableText, true);
                 }}
                 sx={{
-                  ...styles.bannerButton,
-                  borderRadius: 2 // Mantengo il valore originale
+                  ...styles.bannerButton
                 }}
               >
                 Aggiorna
@@ -385,8 +381,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
                 size="small"
                 onClick={() => setShouldReanalyze(false)}
                 sx={{
-                  ...styles.bannerButton,
-                  borderRadius: 2 // Mantengo il valore originale
+                  ...styles.bannerButton
                 }}
               >
                 No
@@ -423,8 +418,7 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
               variant="outlined" 
               onClick={performAnalysis}
               sx={{
-                ...styles.retryButton,
-                borderRadius: 2 // Mantengo il valore originale
+                ...styles.retryButton
               }}
             >
               Riprova
@@ -457,13 +451,12 @@ const TranscriptionView = ({ text, loading, error, transcriptionId, onTextChange
               startIcon={<PsychologyIcon />}
               sx={{
                 ...styles.analyzeButton,
-                borderRadius: 2, // Mantengo il valore originale
                 backgroundColor: '#f5f5f7',
                 color: '#000000',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                boxShadow: SHADOWS.sm,
                 '&:hover': {
                   backgroundColor: '#e5e5e7',
-                  boxShadow: '0 4px 8px rgba(0,0,0,0.05)',
+                  boxShadow: SHADOWS.md,
                   transform: 'translateY(-1px)'
                 }
               }}

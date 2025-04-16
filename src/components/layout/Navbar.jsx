@@ -28,6 +28,7 @@ import {
   Brightness4 as DarkModeIcon,
   Brightness7 as LightModeIcon
 } from '@mui/icons-material';
+import { BORDERS } from '../../styles/themes';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -134,7 +135,7 @@ const Navbar = () => {
                   style={{ 
                     width: 32, 
                     height: 32, 
-                    borderRadius: '50%',
+                    borderRadius: BORDERS.radius.round,
                     objectFit: 'cover'
                   }} 
                 />
@@ -150,7 +151,7 @@ const Navbar = () => {
                     mt: 1.5,
                     boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
                     border: '1px solid rgba(240,44,86,0.1)',
-                    borderRadius: '12px',
+                    borderRadius: BORDERS.radius.sm,
                     minWidth: 200
                   }
                 }}

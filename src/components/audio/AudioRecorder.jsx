@@ -30,6 +30,7 @@ import {
   statusIndicatorStyles,
   audioWaveStyles
 } from '../../styles/audioRecorderStyles';
+import { BORDERS, SPACING } from '../../styles/themes';
 
 // Contenitore per il visualizzatore di onde audio
 const AudioWaveContainer = styled(Box)(audioWaveContainerStyles);
@@ -39,8 +40,8 @@ const AudioWave = styled(Box, {
   shouldForwardProp: (prop) => prop !== 'isActive' && prop !== 'index'
 })(({ isActive, index }) => ({
   width: 4,
-  margin: '0 1px',
-  borderRadius: 4,
+  margin: `0 ${SPACING.xs.xs}px`,
+  borderRadius: BORDERS.radius.sm,
   backgroundColor: '#f02c56',
   position: 'absolute',
   bottom: 0,
@@ -126,17 +127,16 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       display: 'flex', 
       flexDirection: 'column', 
       alignItems: 'center', 
-      gap: { xs: 1.5, sm: 2, md: 3 },
+      gap: { xs: SPACING.sm.xs, sm: SPACING.sm.sm, md: SPACING.md.xs },
       width: '100%'
     }}>
       {/* Toggle Button Group per la selezione della sorgente */}
       <Box sx={{ 
         display: 'flex', 
-        gap: { xs: 1, sm: 2 }, 
+        gap: { xs: SPACING.xs.xs, sm: SPACING.sm.xs }, 
         backgroundColor: '#f5f5f7',
-        borderRadius: 4,
-        padding: { xs: 0.5, sm: 1 },
-        width: '65%',
+        borderRadius: BORDERS.radius.sm,
+        padding: { xs: SPACING.xs.xs, sm: SPACING.xs.sm },
         justifyContent: 'center',
         flexWrap: { xs: 'wrap', sm: 'nowrap' }
       }}>
@@ -165,7 +165,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       </Box>
 
       {/* Visualizzatore onde audio */}
-      <Box sx={{ my: { xs: 4, sm: 5 }, width: '100%' }}>
+      <Box sx={{ my: { xs: SPACING.lg.xs, sm: SPACING.xl.xs }, width: '100%' }}>
       <AudioWaveContainer>
         {waveElements}
       </AudioWaveContainer>
@@ -189,8 +189,8 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       {/* Bottoni di controllo */}
       <Box sx={{ 
         display: 'flex', 
-        gap: { xs: 1, sm: 2 }, 
-        mt: { xs: 1, sm: 2 },
+        gap: { xs: SPACING.xs.xs, sm: SPACING.sm.xs }, 
+        mt: { xs: SPACING.xs.xs, sm: SPACING.sm.xs },
         flexWrap: 'wrap',
         justifyContent: 'center'
       }}>
@@ -254,8 +254,8 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       {audioUrl && (
         <Box sx={{ 
           width: '100%', 
-          mt: { xs: 1, sm: 2 },
-          px: { xs: 1, sm: 2 }
+          mt: { xs: SPACING.xs.xs, sm: SPACING.sm.xs },
+          px: { xs: SPACING.xs.xs, sm: SPACING.xs.sm }
         }}>
           <AppleAudioPlayer src={audioUrl} controls />
         </Box>
@@ -273,10 +273,10 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
 
       {isTranscribing && (
         <Box sx={{ 
-          mt: { xs: 1, sm: 2 }, 
+          mt: { xs: SPACING.xs.xs, sm: SPACING.sm.xs }, 
           textAlign: 'center' 
         }}>
-          <CircularProgress size={{ xs: 20, sm: 24 }} sx={{ mr: { xs: 0.5, sm: 1 } }} />
+          <CircularProgress size={{ xs: 20, sm: 24 }} sx={{ mr: { xs: SPACING.xs.xs, sm: SPACING.xs.sm } }} />
           <Typography variant="body2" color="text.secondary" sx={statusIndicatorStyles.text}>
             {transcriptionStatus}
           </Typography>
@@ -285,7 +285,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
 
       {transcriptionError && (
         <Box sx={{ 
-          mt: { xs: 1, sm: 2 }, 
+          mt: { xs: SPACING.xs.xs, sm: SPACING.sm.xs }, 
           textAlign: 'center' 
         }}>
           <Typography variant="body2" color="error" sx={statusIndicatorStyles.text}>

@@ -6,6 +6,7 @@ import { analysisService } from '../services/api';
 import PageContainer from '../components/layout/PageContainer';
 import AnalysisView from '../components/analysis/AnalysisView';
 import { ApplePaper, containerStyles, pageTitleStyles } from '../styles/pageStyles';
+import { BORDERS } from '../styles/themes';
 
 const Analysis = () => {
   const { id } = useParams();
@@ -79,7 +80,7 @@ const Analysis = () => {
               severity="error" 
               sx={{ 
                 mb: 3,
-                borderRadius: '12px',
+                borderRadius: BORDERS.radius.lg,
                 '& .MuiAlert-icon': {
                   color: '#f02c56'
                 }
@@ -96,7 +97,7 @@ const Analysis = () => {
             <Alert 
               severity="warning" 
               sx={{ 
-                borderRadius: '12px',
+                borderRadius: BORDERS.radius.lg,
                 '& .MuiAlert-icon': {
                   color: '#f5a623'
                 }

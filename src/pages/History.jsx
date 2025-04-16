@@ -23,7 +23,7 @@ import { dashboardService } from '../services/api';
 import { transcriptionService } from '../services/api';
 import PageContainer from '../components/layout/PageContainer';
 import { ApplePaper, AppleCard, containerStyles, pageTitleStyles, pageSubtitleStyles } from '../styles/pageStyles';
-import { COLORS } from '../styles/themes';
+import { COLORS, BORDERS } from '../styles/themes';
 import { 
   tabStyles, 
   statCardStyles, 
@@ -372,7 +372,7 @@ const History = () => {
                             size="medium"
                             sx={{ 
                               bgcolor: `rgba(240, 44, 86, ${0.1 + (item.count / 10)})`,
-                              borderRadius: '12px',
+                              borderRadius: BORDERS.radius.lg,
                               '& .MuiChip-label': { px: 1.5 },
                               color: theme.palette.primary.main
                             }}
@@ -409,7 +409,7 @@ const History = () => {
                         value={stats.storage?.usagePercent || 0} 
                         sx={{ 
                           height: 8, 
-                          borderRadius: 4,
+                          borderRadius: BORDERS.radius.md,
                           bgcolor: 'rgba(240, 44, 86, 0.1)',
                           '& .MuiLinearProgress-bar': {
                             backgroundImage: 'linear-gradient(90deg, #f02c56 0%, #7c32ff 100%)'
