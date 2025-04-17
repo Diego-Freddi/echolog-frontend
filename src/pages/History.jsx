@@ -153,14 +153,42 @@ const History = () => {
 
       console.log('Tentativo download file:', fileToDownload);
       
-      // Utilizziamo window.open con il token nell'URL per evitare problemi CORS
-      // Questa soluzione fa in modo che il browser gestisca direttamente la richiesta
-      const baseUrl = process.env.REACT_APP_API_URL || 'http://localhost:5050';
-      const downloadUrl = `${baseUrl}/api/audio/${fileToDownload}`;
+      // Costruisci l'URL completo per il download
+      const downloadUrl = `${process.env.REACT_APP_API_URL || 'http://localhost:5050'}/api/audio/${fileToDownload}`;
       
-      // Apriamo una nuova finestra/tab con l'URL di download
-      // Il browser gestirà il download senza problemi CORS
-      window.open(downloadUrl, '_blank');
+      // Esegui la richiesta con il token
+      const response = await fetch(downloadUrl, {
+        headers: {
+          'Authorization': `Bearer ${user.token}`,
+          'Accept': 'audio/*'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('Audio non più disponibile');
+        }
+        throw new Error(`Errore nel download del file: ${response.status}`);
+      }
+
+      // Ottieni il blob del file
+      const blob = await response.blob();
+      
+      // Crea un URL oggetto per il blob
+      const url = window.URL.createObjectURL(blob);
+      
+      // Crea un elemento anchor temporaneo
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `audio_${analysis.transcriptionId}.mp3`; // Nome file più descrittivo
+      
+      // Aggiungi l'elemento al DOM, cliccalo e rimuovilo
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Pulisci l'URL oggetto
+      window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Errore nel download dell\'audio:', error);
       // Mostra un messaggio di errore all'utente
