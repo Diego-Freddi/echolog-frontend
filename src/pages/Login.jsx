@@ -1,6 +1,6 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { Box, Typography, Paper } from '@mui/material';
+import React, { useEffect } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/layout/Navbar';
 import GoogleLogin from '../components/auth/GoogleLogin';
@@ -8,7 +8,25 @@ import PageContainer from '../components/layout/PageContainer';
 import { BORDERS } from '../styles/themes';
 
 const Login = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  // Usa useEffect per gestire il redirect
+  useEffect(() => {
+    if (user && !loading) {
+      console.log('User authenticated, redirecting to dashboard...');
+      navigate('/');
+    }
+  }, [user, loading, navigate]);
+
+  // Mostra un loader durante l'autenticazione
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   // Se l'utente è già autenticato, reindirizza alla home
   if (user) {

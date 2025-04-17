@@ -13,6 +13,7 @@ import History from './pages/History';
 import Analysis from './pages/Analysis';
 import Usage from './pages/Usage';
 import TextAnalyzer from './pages/TextAnalyzer';
+import { CircularProgress, Typography } from '@mui/material';
 
 // Importa il client ID dalle variabili d'ambiente
 if (!process.env.REACT_APP_GOOGLE_CLIENT_ID) {
@@ -68,52 +69,78 @@ const ThemeConfig = ({ children }) => {
   );
 };
 
+// Contenuto dell'app dopo l'autenticazione
+const AppContent = () => {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh',
+        backgroundColor: '#f5f5f7'
+      }}>
+        <CircularProgress color="primary" />
+        <Typography variant="body1" style={{ marginLeft: 16 }}>
+          Autenticazione in corso...
+        </Typography>
+      </div>
+    );
+  }
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="/record" element={
+          <ProtectedRoute>
+            <Record />
+          </ProtectedRoute>
+        } />
+        <Route path="/history" element={
+          <ProtectedRoute>
+            <History />
+          </ProtectedRoute>
+        } />
+        <Route path="/analysis/:id" element={
+          <ProtectedRoute>
+            <Analysis />
+          </ProtectedRoute>
+        } />
+        <Route path="/usage" element={
+          <ProtectedRoute>
+            <Usage />
+          </ProtectedRoute>
+        } />
+        <Route path="/text-analyzer" element={
+          <ProtectedRoute>
+            <TextAnalyzer />
+          </ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute>
+            <Usage />
+          </ProtectedRoute>
+        } />
+      </Routes>
+    </Router>
+  );
+};
+
 function App() {
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <ThemeProvider>
         <ThemeConfig>
           <AuthProvider>
-            <Router>
-              <Routes>
-                <Route path="/login" element={<Login />} />
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <Dashboard />
-                  </ProtectedRoute>
-                } />
-                <Route path="/record" element={
-                  <ProtectedRoute>
-                    <Record />
-                  </ProtectedRoute>
-                } />
-                <Route path="/history" element={
-                  <ProtectedRoute>
-                    <History />
-                  </ProtectedRoute>
-                } />
-                <Route path="/analysis/:id" element={
-                  <ProtectedRoute>
-                    <Analysis />
-                  </ProtectedRoute>
-                } />
-                <Route path="/usage" element={
-                  <ProtectedRoute>
-                    <Usage />
-                  </ProtectedRoute>
-                } />
-                <Route path="/text-analyzer" element={
-                  <ProtectedRoute>
-                    <TextAnalyzer />
-                  </ProtectedRoute>
-                } />
-                <Route path="/profile" element={
-                  <ProtectedRoute>
-                    <Usage />
-                  </ProtectedRoute>
-                } />
-              </Routes>
-            </Router>
+            <AppContent />
           </AuthProvider>
         </ThemeConfig>
       </ThemeProvider>

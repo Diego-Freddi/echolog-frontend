@@ -45,29 +45,78 @@ const setupInterceptors = () => {
 // Servizio di autenticazione
 export const authService = {
   // Login con Google
-  loginWithGoogle: async (userData) => {
+  loginWithGoogle: async (tokenData) => {
     try {
-      const response = await api.post('/auth/google', userData);
-      if (response.data.token) {
-        localStorage.setItem('user', JSON.stringify(response.data));
+      console.log('Sending token to backend for verification...');
+      const response = await api.post('/auth/google', tokenData, {
+        timeout: 15000  // Timeout di 15 secondi
+      });
+      
+      if (!response.data || !response.data.token) {
+        console.error('Invalid response from server:', response.data);
+        throw new Error('Risposta del server non valida');
       }
+      
+      // Aggiungi un timestamp al momento del login
+      const userData = { 
+        ...response.data, 
+        timestamp: Date.now() 
+      };
+      
+      console.log('Token verification successful, storing user data...');
+      localStorage.setItem('user', JSON.stringify(userData));
       return response.data;
     } catch (error) {
-      throw error.response?.data?.error || 'Errore durante il login';
+      console.error('Login error:', error);
+      
+      // Log dettagliato dell'errore
+      if (error.response) {
+        console.error('Server response:', error.response.status, error.response.data);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      }
+      
+      throw new Error(error.response?.data?.error || 'Errore durante il login con Google');
     }
   },
 
-  // Verifica token
+  // Verifica token con fallback
   verifyToken: async () => {
     try {
+      console.log('Verifying token...');
       const user = JSON.parse(localStorage.getItem('user'));
       if (!user?.token) {
         throw new Error('Token non trovato');
       }
 
-      const response = await api.get('/auth/verify');
+      // Utilizza un timeout più lungo per la verifica del token
+      const response = await api.get('/auth/verify', {
+        timeout: 15000  // Timeout di 15 secondi
+      });
+      
+      console.log('Token verified successfully');
       return response.data;
     } catch (error) {
+      console.error('Token verification error:', error);
+      
+      // Se è un errore di timeout, possiamo provare a considerare l'utente ancora valido
+      // se il token non è scaduto (basandoci sulla data di creazione memorizzata)
+      if (error.code === 'ECONNABORTED' || (error.message && error.message.includes('timeout'))) {
+        console.log('Verification timed out, checking local token expiry...');
+        const user = JSON.parse(localStorage.getItem('user'));
+        
+        // Controlla la validità locale del token (se è stato salvato un timestamp)
+        if (user && user.timestamp) {
+          const tokenAge = Date.now() - user.timestamp;
+          // Se il token ha meno di 6 giorni (il token dura 7 giorni), consideriamolo valido
+          if (tokenAge < 6 * 24 * 60 * 60 * 1000) {
+            console.log('Using cached user data due to timeout');
+            return { user: user.user };
+          }
+        }
+      }
+      
+      // Altrimenti, logout
       authService.logout();
       throw error.response?.data?.error || 'Sessione scaduta';
     }

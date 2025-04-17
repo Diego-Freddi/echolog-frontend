@@ -15,15 +15,32 @@ export const AuthProvider = ({ children }) => {
         // Verifica se c'è un utente salvato
         const initAuth = async () => {
             try {
+                setLoading(true);
                 const savedUser = authService.getCurrentUser();
+                
                 if (savedUser) {
-                    await authService.verifyToken();
-                    // Estrai i dati dell'utente dall'oggetto salvato
-                    setUser(savedUser.user);
+                    console.log('Found saved user, verifying token...');
+                    try {
+                        // Imposta un timeout più lungo (30 secondi)
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 30000);
+                        
+                        await authService.verifyToken();
+                        clearTimeout(timeoutId);
+                        
+                        console.log('Token successfully verified');
+                        setUser(savedUser.user);
+                    } catch (err) {
+                        console.error('Token verification failed:', err);
+                        // Se fallisce la verifica, facciamo logout
+                        authService.logout();
+                        setUser(null);
+                    }
                 }
             } catch (err) {
-                console.error('Errore durante l\'inizializzazione:', err);
+                console.error('Auth initialization error:', err);
                 authService.logout();
+                setUser(null);
             } finally {
                 setLoading(false);
             }
@@ -34,14 +51,22 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (googleToken) => {
         try {
+            setLoading(true);
             setError(null);
+            console.log('Processing login...');
             const data = await authService.loginWithGoogle(googleToken);
-            // Estrai i dati dell'utente dall'oggetto response
+            if (!data.user || !data.token) {
+                throw new Error('Dati utente incompleti ricevuti dal server');
+            }
             setUser(data.user);
+            console.log('User authenticated successfully:', data.user.name);
             return data;
         } catch (err) {
-            setError(err.message);
+            console.error('Login error in AuthContext:', err);
+            setError(err.message || 'Errore durante il login');
             throw err;
+        } finally {
+            setLoading(false);
         }
     };
 
