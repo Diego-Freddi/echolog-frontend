@@ -23,6 +23,7 @@ export function useAudioRecorder() {
   const [transcriptionId, setTranscriptionId] = useState(null);
   const [recordingDuration, setRecordingDuration] = useState(0);
   const [analysis, setAnalysis] = useState(null);
+  const [audioBlob, setAudioBlob] = useState(null);
   
   // Refs
   const recorderRef = useRef(null);
@@ -82,6 +83,56 @@ export function useAudioRecorder() {
     dataArrayRef.current = null;
     currentBlobRef.current = null;
   }, [audioUrl]);
+
+    // Converte un file in MP3
+    const convertToMP3 = useCallback(async (file) => {
+      try {
+        setIsConverting(true);
+        
+        if (!ffmpegRef.current) {
+          throw new Error('FFmpeg non inizializzato');
+        }
+        
+        const ffmpeg = ffmpegRef.current;
+        
+        // Scrivi il file di input
+        await ffmpeg.writeFile('input.mp4', await fetchFile(file));
+        
+        // Esegui la conversione
+        await ffmpeg.exec([
+          '-i', 'input.mp4',
+          '-acodec', 'libmp3lame',
+          '-ab', '128k',
+          'output.mp3'
+        ]);
+        
+        // Leggi il file convertito
+        const data = await ffmpeg.readFile('output.mp3');
+        
+        // Crea un nuovo Blob
+        const mp3Blob = new Blob([data], { type: 'audio/mp3' });
+        
+        // Revoca l'URL precedente se esiste
+        if (audioUrl) {
+          URL.revokeObjectURL(audioUrl);
+        }
+        
+        // Crea un nuovo URL per il blob
+        const url = URL.createObjectURL(mp3Blob);
+        currentBlobRef.current = mp3Blob;
+        console.log('✅ Blob assegnato in convertToMP3:', currentBlobRef.current);
+        setAudioUrl(url);
+        
+        setIsConverting(false);
+        return mp3Blob;
+      } catch (error) {
+        console.error('Errore nella conversione:', error);
+        setIsConverting(false);
+        setTranscriptionError('Errore nella conversione del file audio');
+        throw error;
+      }
+    }, [audioUrl]);
+  
 
   // Inizializza FFmpeg
   useEffect(() => {
@@ -240,21 +291,48 @@ export function useAudioRecorder() {
   // Arresta la registrazione
   const stopRecording = useCallback(() => {
     if (recorderRef.current) {
-      // Ferma il timer
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
       }
-      
-      recorderRef.current.stopRecording(() => {
-        const blob = recorderRef.current.getBlob();
-        currentBlobRef.current = blob;
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
-        setIsRecording(false);
-        setIsPaused(false);
+
+      recorderRef.current.stopRecording(async () => {
+        try {
+          const originalBlob = recorderRef.current.getBlob();
+          console.log('🎙️ Blob originale:', originalBlob);
+          console.log('Dimensione blob originale:', originalBlob.size, 'bytes');
+
+          // Verifica il MIME type del blob
+          console.log('MIME type blob originale:', originalBlob.type);
+
+          const mp3Blob = await convertToMP3(originalBlob);
+          console.log('🎧 Blob MP3 pronto:', mp3Blob);
+          console.log('Dimensione blob convertito:', mp3Blob.size, 'bytes');
+          console.log('MIME type blob convertito:', mp3Blob.type);
+
+          // Assegna esplicitamente il blob alla ref e allo stato
+          currentBlobRef.current = mp3Blob;
+          setAudioBlob(mp3Blob);
+          console.log('Blob assegnato a currentBlobRef:', currentBlobRef.current);
+          
+          // Crea URL e aggiorna lo stato
+          const url = URL.createObjectURL(mp3Blob);
+          setAudioUrl(url);
+          
+          // Test immediato per verificare che il blob sia disponibile
+          if (currentBlobRef.current) {
+            console.log('✅ currentBlobRef.current è disponibile dopo la conversione');
+          } else {
+            console.error('❌ currentBlobRef.current è null/undefined dopo la conversione');
+          }
+        } catch (e) {
+          console.error('❌ Errore nella conversione a MP3:', e);
+        } finally {
+          setIsRecording(false);
+          setIsPaused(false);
+        }
       });
     }
-  }, []);
+  }, [convertToMP3]);
 
   // Pausa la registrazione
   const pauseRecording = useCallback(() => {
@@ -288,6 +366,10 @@ export function useAudioRecorder() {
         
         // Imposta il blob corrente e l'URL audio
         currentBlobRef.current = processedBlob;
+        setAudioBlob(processedBlob);
+        
+        console.log('File caricato:', processedBlob.type, processedBlob.size, 'bytes');
+        
         const url = URL.createObjectURL(processedBlob);
         setAudioUrl(url);
       } catch (error) {
@@ -295,78 +377,48 @@ export function useAudioRecorder() {
         setTranscriptionError('Errore nell\'elaborazione del file audio');
       }
     }
-  }, []);
+  }, [convertToMP3]);
 
-  // Converte un file in MP3
-  const convertToMP3 = useCallback(async (file) => {
-    try {
-      setIsConverting(true);
-      
-      if (!ffmpegRef.current) {
-        throw new Error('FFmpeg non inizializzato');
-      }
-      
-      const ffmpeg = ffmpegRef.current;
-      
-      // Scrivi il file di input
-      await ffmpeg.writeFile('input.mp4', await fetchFile(file));
-      
-      // Esegui la conversione
-      await ffmpeg.exec([
-        '-i', 'input.mp4',
-        '-acodec', 'libmp3lame',
-        '-ab', '128k',
-        'output.mp3'
-      ]);
-      
-      // Leggi il file convertito
-      const data = await ffmpeg.readFile('output.mp3');
-      
-      // Crea un nuovo Blob
-      const mp3Blob = new Blob([data], { type: 'audio/mp3' });
-      
-      // Revoca l'URL precedente se esiste
-      if (audioUrl) {
-        URL.revokeObjectURL(audioUrl);
-      }
-      
-      // Crea un nuovo URL per il blob
-      const url = URL.createObjectURL(mp3Blob);
-      currentBlobRef.current = mp3Blob;
-      setAudioUrl(url);
-      
-      setIsConverting(false);
-      return mp3Blob;
-    } catch (error) {
-      console.error('Errore nella conversione:', error);
-      setIsConverting(false);
-      setTranscriptionError('Errore nella conversione del file audio');
-      throw error;
-    }
-  }, [audioUrl]);
 
-  // Scarica l'audio registrato
+  // Scarica l'audio registrato utilizzando un metodo alternativo
   const handleDownload = useCallback(() => {
-    if (!currentBlobRef.current) return;
+    // Usiamo prima lo stato, poi il ref come fallback
+    const blobToDownload = audioBlob || currentBlobRef.current;
+    
+    if (!blobToDownload) {
+      console.error('Nessun blob disponibile per il download', { 
+        stateBlob: !!audioBlob, 
+        refBlob: !!currentBlobRef.current 
+      });
+      return;
+    }
+    
+    console.log('Download in corso, dimensione blob:', blobToDownload.size, 'bytes');
+    
     try {
-      // Crea un URL temporaneo per il download
-      const downloadUrl = URL.createObjectURL(currentBlobRef.current);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = `registrazione_${new Date().toISOString().replace(/[:.]/g, '-')}.mp3`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      // Approccio semplificato e diretto
+      const fileName = `registrazione_${new Date().toISOString().replace(/[:.]/g, '-')}.mp3`;
+      const url = URL.createObjectURL(blobToDownload);
       
-      // Revoca l'URL temporaneo dopo il download
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      
+      console.log('Avvio download...');
+      link.click();
+      
+      // Pulizia con tempistiche più lunghe
       setTimeout(() => {
-        URL.revokeObjectURL(downloadUrl);
-      }, 100);
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        console.log('Pulizia URL completata');
+      }, 500);
     } catch (err) {
       console.error('Errore nel download:', err);
       setTranscriptionError('Impossibile scaricare il file audio');
     }
-  }, []);
+  }, [audioBlob]);
 
   // Trascrivi l'audio
   const transcribeAudio = useCallback(async (audioBlob, onTranscribe) => {
@@ -472,7 +524,7 @@ export function useAudioRecorder() {
     transcriptionId,
     recordingDuration,
     analysis,
-    currentBlob: currentBlobRef.current,
+    currentBlob: audioBlob || currentBlobRef.current,
     
     // Funzioni
     startRecording,

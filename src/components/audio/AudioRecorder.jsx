@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { 
   Box, 
@@ -59,6 +59,8 @@ const AppleAudioPlayer = styled('audio')(audioPlayerStyles);
  */
 const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   const theme = useTheme();
+  const [isDownloading, setIsDownloading] = useState(false);
+  
   const {
     // Stati
     isRecording,
@@ -103,6 +105,28 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
   // Callback per avviare la trascrizione
   const handleTranscribeClick = () => {
     transcribeAudio(currentBlob, onTranscribe);
+  };
+
+  // Gestione del download con stato
+  const handleDownloadClick = () => {
+    setIsDownloading(true);
+    console.log('Tentativo di download...');
+    try {
+      if (currentBlob) {
+        console.log('Blob disponibile:', currentBlob.size, 'bytes');
+        handleDownload();
+        // Resettiamo lo stato dopo un po' di tempo
+        setTimeout(() => {
+          setIsDownloading(false);
+        }, 1000);
+      } else {
+        console.error('ERRORE: Nessun blob disponibile per il download');
+        setIsDownloading(false);
+      }
+    } catch (error) {
+      console.error('Errore durante il download:', error);
+      setIsDownloading(false);
+    }
   };
 
   // Genera le barre delle onde audio
@@ -216,10 +240,12 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
           <>
             <Button
               variant="contained"
-              onClick={handleDownload}
+              onClick={handleDownloadClick}
+              disabled={isDownloading}
+              startIcon={isDownloading ? <CircularProgress size={16} color="inherit" /> : null}
               sx={buttonStyles.base}
             >
-              Scarica MP3
+              {isDownloading ? 'Download in corso...' : 'Scarica MP3'}
             </Button>
             <Button
               variant="contained"
