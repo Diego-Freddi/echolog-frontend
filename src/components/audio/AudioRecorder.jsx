@@ -181,7 +181,8 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
           startIcon={<ComputerIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />}
           sx={{ 
             ...buttonStyles.sourceSelector,
-            ...buttonStyles.selected(audioSource === 'system')
+            ...buttonStyles.selected(audioSource === 'system'),
+            display: { xs: 'none', sm: 'flex' }
           }}
         >
           Audio di Sistema
@@ -189,7 +190,7 @@ const AudioRecorder = ({ onRecordingComplete, onTranscribe }) => {
       </Box>
 
       {/* Visualizzatore onde audio */}
-      <Box sx={{ my: { xs: SPACING.lg.xs, sm: SPACING.xl.xs }, width: '100%' }}>
+      <Box sx={{ my: { xs: SPACING.lg.sm, sm: SPACING.xl.sm }, width: '100%' }}>
       <AudioWaveContainer>
         {waveElements}
       </AudioWaveContainer>
