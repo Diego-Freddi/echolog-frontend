@@ -84,7 +84,7 @@ const Dashboard = () => {
                         alignItems: 'center'
                     }}
                 >
-                    <img
+                    {/* <img
                         src="/EchoLog-Logo-512x143.png"
                         alt="EchoLog Watermark"
                         style={{
@@ -92,7 +92,7 @@ const Dashboard = () => {
                             maxWidth: '1500px',
                             height: 'auto'
                         }}
-                    />
+                    /> */}
                 </Box>
 
                 {/* Widget Container */}
