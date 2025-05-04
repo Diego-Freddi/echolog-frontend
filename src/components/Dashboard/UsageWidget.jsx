@@ -342,7 +342,7 @@ const UsageWidget = () => {
       
       <Divider sx={{ mb: 2 }} />
       
-      <Grid container spacing={3}>
+      <Grid container spacing={3} sx={{ justifyContent: 'center' }}>
         {/* Prima riga: Crediti rimanenti */}
         <Grid item xs={12} md={6}>
           <CreditCard 
